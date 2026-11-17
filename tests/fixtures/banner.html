@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: anti-adblock banner</title>
+    <link rel="stylesheet" href="site.css" />
+    <style>
+      #adblock-notice {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 5000;
+        background: #fff4e5;
+        border-top: 2px solid #f59e0b;
+        padding: 14px 24px;
+        font: 15px system-ui;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site">Tech Weekly</header>
+    <main>
+      <h1>Ten keyboard shortcuts you should know</h1>
+      <p id="article-text">Shortcuts save time. Here are ten worth learning.</p>
+    </main>
+    <div id="adblock-notice" class="adblock-notice">
+      <span>We noticed you're using an ad blocker. Please consider whitelisting our site.</span>
+      <button class="modal-btn">Whitelist us</button>
+    </div>
+  </body>
+</html>

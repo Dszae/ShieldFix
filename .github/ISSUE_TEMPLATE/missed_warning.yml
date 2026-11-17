@@ -1,0 +1,48 @@
+name: Missed anti-adblock warning
+description: A site shows an "ad blocker detected" wall that ShieldFix didn't detect or can't fix.
+title: '[Missed] '
+labels: ['missed warning', 'detection']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help ShieldFix learn a new pattern. Only the site name and the diagnosis are needed.
+        Note: ShieldFix deliberately does not bypass paywalls, logins or subscription prompts.
+  - type: input
+    id: site
+    attributes:
+      label: Site
+      description: Hostname only, e.g. `news.example.com`. Add a path only if the wall appears on specific pages and the path contains nothing personal.
+    validations:
+      required: true
+  - type: textarea
+    id: wall
+    attributes:
+      label: What does the warning say and look like?
+      description: Paste the warning text, and describe it (full-screen, banner at the bottom, inside a video player…).
+    validations:
+      required: true
+  - type: textarea
+    id: diagnosis
+    attributes:
+      label: Diagnosis output
+      description: Popup → **Diagnose**. Copy the result, confidence and any matched signals.
+      render: text
+  - type: dropdown
+    id: blocker
+    attributes:
+      label: What blocks ads in your browser?
+      options:
+        - Brave Shields (standard)
+        - Brave Shields (aggressive)
+        - An ad-blocking extension
+        - Other / not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ShieldFix version and browser
+      placeholder: ShieldFix 1.0.0, Brave 1.99
+    validations:
+      required: true

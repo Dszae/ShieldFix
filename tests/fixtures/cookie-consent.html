@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: cookie consent</title>
+    <link rel="stylesheet" href="site.css" />
+    <style>
+      html {
+        overflow: hidden;
+      }
+      #consent {
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        background: rgba(0, 0, 0, 0.5);
+        display: grid;
+        place-items: center;
+      }
+      #consent .box {
+        background: #fff;
+        padding: 28px;
+        border-radius: 12px;
+        max-width: 520px;
+        font-family: system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site">World News</header>
+    <main>
+      <h1>Markets close higher</h1>
+      <p id="article-text">Stocks rose for a third day.</p>
+    </main>
+    <div id="consent" role="dialog" aria-modal="true" aria-label="Privacy choices">
+      <div class="box">
+        <h2>We value your privacy</h2>
+        <p>
+          We and our partners use cookies to store and access information on your device. You can
+          accept all, reject all, or manage preferences, including for legitimate interest.
+        </p>
+        <button class="modal-btn">Accept all</button>
+        <button class="modal-btn">Reject all</button>
+        <button class="modal-btn">Manage preferences</button>
+      </div>
+    </div>
+  </body>
+</html>

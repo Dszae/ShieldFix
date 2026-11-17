@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: subscription prompt</title>
+    <link rel="stylesheet" href="site.css" />
+    <style>
+      body {
+        overflow: hidden;
+      }
+      #paywall {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 60vh;
+        z-index: 9999;
+        background: linear-gradient(transparent, #fff 30%);
+        display: grid;
+        place-items: end center;
+        padding-bottom: 40px;
+        font-family: system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site">The Ledger</header>
+    <main>
+      <h1>Inside the new trade agreement</h1>
+      <p id="article-text">Negotiators reached a deal late on Sunday.</p>
+    </main>
+    <div id="paywall">
+      <div>
+        <h2>You've reached your free article limit</h2>
+        <p>Subscribe to continue reading. Already a subscriber? Sign in.</p>
+        <button class="modal-btn">Subscribe</button>
+      </div>
+    </div>
+  </body>
+</html>

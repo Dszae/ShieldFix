@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: video player error</title>
+    <link rel="stylesheet" href="site.css" />
+    <style>
+      .player {
+        position: relative;
+        width: 640px;
+        height: 360px;
+        background: #000;
+        margin: 24px 0;
+      }
+      .player video {
+        width: 100%;
+        height: 100%;
+      }
+      .player .player-error {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-family: system-ui;
+        text-align: center;
+        padding: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site">StreamZone</header>
+    <main>
+      <h1>Highlights: championship final</h1>
+      <div class="player">
+        <video id="vid" src="does-not-exist.mp4" muted></video>
+        <div class="player-error" id="player-error">
+          <div>
+            <p>This video can't play because an ad blocker is enabled.</p>
+            <p>Please disable your ad blocker to watch this video.</p>
+          </div>
+        </div>
+      </div>
+      <p id="article-text">Watch the best moments from last night's match.</p>
+    </main>
+  </body>
+</html>

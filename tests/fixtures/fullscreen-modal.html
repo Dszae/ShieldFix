@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: full-screen anti-adblock modal</title>
+    <link rel="stylesheet" href="site.css" />
+    <style>
+      html,
+      body {
+        overflow: hidden;
+      }
+      #page-content {
+        filter: blur(6px);
+      }
+      #adb-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 99998;
+      }
+      #adb-wall {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: grid;
+        place-items: center;
+      }
+      #adb-wall .dialog {
+        background: #fff;
+        padding: 32px;
+        border-radius: 12px;
+        max-width: 440px;
+        font-family: system-ui;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="page-content">
+      <header class="site">Daily Chronicle</header>
+      <main>
+        <h1>City council approves new park</h1>
+        <p id="article-text">
+          The council voted on Tuesday to approve a new riverside park. Construction begins next
+          spring and is expected to take two years.
+        </p>
+        <p>
+          The eleven-hectare site along the east bank will include a playground, a community garden,
+          a cycling path linking the old harbour to the market district, and a restored wetland that
+          planners say will reduce flooding in the neighbourhoods downstream.
+        </p>
+        <h2>What residents said</h2>
+        <p>
+          More than four hundred people attended the public consultation in September. Most asked
+          for more shade trees and better lighting; several local schools requested an outdoor
+          classroom, which the final plan now includes near the northern entrance.
+        </p>
+        <p>
+          “We have waited a long time for green space on this side of the river,” said one resident
+          who has lived in the area for thirty years. “This changes how the whole neighbourhood
+          feels.”
+        </p>
+        <h2>Cost and timeline</h2>
+        <p>
+          The project is funded through a combination of municipal bonds and a regional climate
+          grant. The first phase, covering the wetland and the cycling path, is scheduled to open to
+          the public in the summer after next.
+        </p>
+      </main>
+    </div>
+    <div id="adb-backdrop"></div>
+    <div id="adb-wall" class="adblock-wall">
+      <div class="dialog">
+        <h2>Ad blocker detected</h2>
+        <p>
+          We rely on ads to keep our journalism free. Please disable your ad blocker or whitelist
+          our website to continue reading.
+        </p>
+        <button class="modal-btn" onclick="location.reload()">I've disabled my ad blocker</button>
+      </div>
+    </div>
+  </body>
+</html>

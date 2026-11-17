@@ -1,0 +1,40 @@
+name: Bug report
+description: Something in ShieldFix doesn't work as expected (UI, settings, rules, undo…).
+title: '[Bug] '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For detection problems, please use the **False positive** or **Missed warning** templates instead.
+        Security vulnerabilities must be reported privately — see SECURITY.md.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Click …
+        3. See …
+    validations:
+      required: true
+  - type: textarea
+    id: errors
+    attributes:
+      label: Errors
+      description: Any errors shown on the ShieldFix card at `brave://extensions` (or `chrome://extensions`).
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: ShieldFix version, browser and OS
+      placeholder: ShieldFix 1.0.0, Brave 1.99, Windows 11
+    validations:
+      required: true

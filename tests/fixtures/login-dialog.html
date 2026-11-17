@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: login dialog</title>
+    <link rel="stylesheet" href="site.css" />
+    <style>
+      #login {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.6);
+        display: grid;
+        place-items: center;
+      }
+      #login form {
+        background: #fff;
+        padding: 28px;
+        border-radius: 12px;
+        width: 360px;
+        font-family: system-ui;
+        display: grid;
+        gap: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site">Members Forum</header>
+    <main>
+      <h1>Community discussion</h1>
+      <p id="article-text">Join the conversation.</p>
+    </main>
+    <div id="login" role="dialog" aria-modal="true" aria-label="Sign in">
+      <form onsubmit="return false;">
+        <h2>Sign in to continue</h2>
+        <label>Email <input type="email" name="email" autocomplete="username" /></label>
+        <label
+          >Password <input type="password" name="password" autocomplete="current-password"
+        /></label>
+        <button class="modal-btn">Log in</button>
+        <a href="#">Forgot your password?</a>
+      </form>
+    </div>
+  </body>
+</html>

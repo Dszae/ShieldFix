@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: ordinary website modal</title>
+    <link rel="stylesheet" href="site.css" />
+    <style>
+      dialog {
+        border: 0;
+        border-radius: 12px;
+        padding: 28px;
+        max-width: 420px;
+        font-family: system-ui;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site">Garden Notes</header>
+    <main>
+      <h1>Spring planting guide</h1>
+      <p id="article-text">Plant peas as soon as the soil can be worked.</p>
+    </main>
+    <dialog id="newsletter">
+      <h2>Get our weekly newsletter</h2>
+      <p>Seasonal tips, every Friday. No spam.</p>
+      <button class="modal-btn" onclick="this.closest('dialog').close()">Maybe later</button>
+    </dialog>
+    <script>
+      document.getElementById('newsletter').showModal();
+    </script>
+  </body>
+</html>

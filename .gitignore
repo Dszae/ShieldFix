@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-e2e/
+release/
+test-results/
+playwright-report/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json

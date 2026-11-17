@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: dynamically inserted anti-adblock overlay</title>
+    <link rel="stylesheet" href="site.css" />
+  </head>
+  <body>
+    <header class="site">Recipe Hub</header>
+    <main>
+      <h1>Weeknight lemon pasta</h1>
+      <p id="article-text">A quick dinner in 20 minutes.</p>
+      <p>
+        Bright, creamy and ready before the water has fully cooled. This is the pasta we make when
+        the fridge is nearly empty and everyone is hungry.
+      </p>
+      <h2>Ingredients</h2>
+      <ul>
+        <li>400 g spaghetti or linguine</li>
+        <li>2 lemons, zest and juice</li>
+        <li>60 g butter and a splash of olive oil</li>
+        <li>80 g grated parmesan, plus more to serve</li>
+        <li>A handful of basil, black pepper and salt</li>
+      </ul>
+      <h2>Method</h2>
+      <ol>
+        <li>Cook the pasta in well-salted water until just al dente. Keep a mug of the water.</li>
+        <li>Melt the butter with the oil and lemon zest over low heat.</li>
+        <li>Toss the pasta with the butter, lemon juice, cheese and a little pasta water.</li>
+        <li>Finish with basil and pepper, and serve straight away.</li>
+      </ol>
+    </main>
+    <script>
+      // Like many anti-adblock scripts: wait, "check" for a blocker, then lock the page.
+      setTimeout(() => {
+        document.body.style.overflow = 'hidden';
+        const wall = document.createElement('div');
+        wall.id = 'dyn-wall';
+        wall.setAttribute(
+          'style',
+          'position:fixed;inset:0;z-index:2147483000;background:rgba(15,15,15,.82);display:grid;place-items:center;',
+        );
+        const box = document.createElement('div');
+        box.setAttribute(
+          'style',
+          'background:#fff;padding:28px;border-radius:10px;max-width:420px;font-family:system-ui',
+        );
+        const h = document.createElement('h2');
+        h.textContent = 'Adblock detected!';
+        const p = document.createElement('p');
+        p.textContent = 'Please turn off your adblocker to access this content.';
+        const b = document.createElement('button');
+        b.className = 'modal-btn';
+        b.textContent = 'Refresh page';
+        box.append(h, p, b);
+        wall.appendChild(box);
+        document.body.appendChild(wall);
+        window.__wallInserted = true;
+      }, 1200);
+    </script>
+  </body>
+</html>

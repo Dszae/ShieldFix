@@ -1,0 +1,48 @@
+name: False positive
+description: ShieldFix flagged or hid something that is NOT an anti-adblock warning.
+title: '[False positive] '
+labels: ['false positive', 'detection']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks — false-positive reports are the most valuable feedback for ShieldFix.
+        **Please don't include personal information** (names, emails, account pages, screenshots showing private data).
+  - type: input
+    id: site
+    attributes:
+      label: Site
+      description: The hostname only, e.g. `news.example.com`.
+      placeholder: news.example.com
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What was flagged?
+      description: What kind of element was it really (cookie banner, login, newsletter popup, article text…)?
+    validations:
+      required: true
+  - type: textarea
+    id: diagnosis
+    attributes:
+      label: Diagnosis output
+      description: In the popup, open **Diagnose** and copy the result, confidence and matched signals. Turning on **Settings → Developer diagnostics** shows signal weights.
+      render: text
+  - type: dropdown
+    id: hidden
+    attributes:
+      label: Was the element hidden?
+      options:
+        - 'No — it was only reported'
+        - 'Yes — after I applied a fix'
+        - 'Yes — automatically (saved rule or auto-apply)'
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ShieldFix version and browser
+      placeholder: ShieldFix 1.0.0, Brave 1.99
+    validations:
+      required: true

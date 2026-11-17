@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Design tokens. Every colour pair used for text meets WCAG 2.2 AA contrast
+ * (4.5:1) against the surface it is placed on, in both themes.
+ */
+:root {
+  color-scheme: light;
+  --sf-bg: #f6f6f7;
+  --sf-surface: #ffffff;
+  --sf-surface-2: #f4f4f5;
+  --sf-border: #e4e4e7;
+  --sf-border-strong: #d4d4d8;
+  --sf-text: #18181b;
+  --sf-muted: #52525b;
+  --sf-subtle: #696971;
+  --sf-accent: #0f766e;
+  --sf-accent-hover: #115e59;
+  --sf-accent-fg: #ffffff;
+  --sf-accent-soft: #e6f6f4;
+  --sf-accent-soft-fg: #115e59;
+  --sf-ok: #15803d;
+  --sf-ok-soft: #e8f7ed;
+  --sf-ok-fg: #166534;
+  --sf-warn: #b45309;
+  --sf-warn-soft: #fdf3e1;
+  --sf-warn-fg: #92400e;
+  --sf-danger: #b91c1c;
+  --sf-danger-soft: #fdecec;
+  --sf-danger-fg: #991b1b;
+  --sf-info: #1d4ed8;
+  --sf-info-soft: #eaf1fd;
+  --sf-info-fg: #1e40af;
+  --sf-focus: #0f766e;
+  --sf-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 1px rgb(0 0 0 / 0.03);
+  --sf-shadow-lg: 0 12px 32px rgb(0 0 0 / 0.12), 0 2px 6px rgb(0 0 0 / 0.06);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --sf-bg: #0d0d0f;
+  --sf-surface: #161619;
+  --sf-surface-2: #1d1d21;
+  --sf-border: #2a2a30;
+  --sf-border-strong: #3a3a42;
+  --sf-text: #f4f4f5;
+  --sf-muted: #b4b4bc;
+  --sf-subtle: #9a9aa3;
+  --sf-accent: #2dd4bf;
+  --sf-accent-hover: #5eead4;
+  --sf-accent-fg: #042f2e;
+  --sf-accent-soft: #0f2e2b;
+  --sf-accent-soft-fg: #7ff0de;
+  --sf-ok: #4ade80;
+  --sf-ok-soft: #10261a;
+  --sf-ok-fg: #86efac;
+  --sf-warn: #fbbf24;
+  --sf-warn-soft: #2a2010;
+  --sf-warn-fg: #fcd34d;
+  --sf-danger: #f87171;
+  --sf-danger-soft: #2c1414;
+  --sf-danger-fg: #fca5a5;
+  --sf-info: #60a5fa;
+  --sf-info-soft: #111e33;
+  --sf-info-fg: #93c5fd;
+  --sf-focus: #5eead4;
+  --sf-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  --sf-shadow-lg: 0 16px 40px rgb(0 0 0 / 0.55);
+}
+
+@theme inline {
+  --color-bg: var(--sf-bg);
+  --color-surface: var(--sf-surface);
+  --color-surface-2: var(--sf-surface-2);
+  --color-line: var(--sf-border);
+  --color-line-strong: var(--sf-border-strong);
+  --color-fg: var(--sf-text);
+  --color-muted: var(--sf-muted);
+  --color-subtle: var(--sf-subtle);
+  --color-accent: var(--sf-accent);
+  --color-accent-hover: var(--sf-accent-hover);
+  --color-accent-fg: var(--sf-accent-fg);
+  --color-accent-soft: var(--sf-accent-soft);
+  --color-accent-soft-fg: var(--sf-accent-soft-fg);
+  --color-ok: var(--sf-ok);
+  --color-ok-soft: var(--sf-ok-soft);
+  --color-ok-fg: var(--sf-ok-fg);
+  --color-warn: var(--sf-warn);
+  --color-warn-soft: var(--sf-warn-soft);
+  --color-warn-fg: var(--sf-warn-fg);
+  --color-danger: var(--sf-danger);
+  --color-danger-soft: var(--sf-danger-soft);
+  --color-danger-fg: var(--sf-danger-fg);
+  --color-info: var(--sf-info);
+  --color-info-soft: var(--sf-info-soft);
+  --color-info-fg: var(--sf-info-fg);
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, Menlo, monospace;
+  --shadow-card: var(--sf-shadow);
+  --shadow-pop: var(--sf-shadow-lg);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-bg text-fg font-sans text-[13px] leading-[1.5];
+  }
+  :focus-visible {
+    outline: 2px solid var(--sf-focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: var(--sf-accent-soft);
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer utilities {
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .animate-enter {
+    animation: sf-enter 160ms ease-out;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes sf-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}

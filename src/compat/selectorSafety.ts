@@ -1,0 +1,120 @@
+/**
+ * Static safety checks for CSS selectors stored in compatibility rules.
+ *
+ * CSS selectors cannot execute code, but an overly broad or expensive selector could
+ * hide important content or slow pages down. Rules must therefore target a specific,
+ * identifiable element (class, id or attribute), use a restricted character set, and
+ * avoid costly or structural pseudo-classes. Syntax validity is checked separately
+ * against a real DOM where one is available (see `isSyntacticallyValidSelector`).
+ */
+
+export type SelectorCheck = { ok: true } | { ok: false; reason: string };
+
+export const MAX_SELECTOR_LENGTH = 200;
+const ALLOWED_CHARS = /^[A-Za-z0-9_\-#.[\]=:"'()\s>+~*^$|,]+$/;
+const ALLOWED_PSEUDOS = new Set([
+  'not',
+  'first-child',
+  'last-child',
+  'only-child',
+  'nth-child',
+  'nth-of-type',
+  'first-of-type',
+  'last-of-type',
+]);
+const PROTECTED_TAGS = new Set(['html', 'head', 'body', 'main']);
+
+function splitTopLevel(selector: string, separator: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let quote: string | null = null;
+  let current = '';
+  for (const ch of selector) {
+    if (quote) {
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (ch === '(' || ch === '[') {
+      depth++;
+    } else if (ch === ')' || ch === ']') {
+      depth--;
+    } else if (depth === 0 && ch === separator) {
+      parts.push(current);
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  parts.push(current);
+  return parts;
+}
+
+/** The last compound selector of a complex selector (after the final combinator). */
+function lastCompound(part: string): string {
+  const pieces = splitTopLevel(part.replace(/\s*([>+~])\s*/g, ' ').trim(), ' ').filter(Boolean);
+  return pieces[pieces.length - 1] ?? '';
+}
+
+export function checkSelectorSafety(input: string): SelectorCheck {
+  const selector = input.trim();
+  if (selector.length === 0) return { ok: false, reason: 'Selector is empty.' };
+  if (selector.length > MAX_SELECTOR_LENGTH) {
+    return { ok: false, reason: `Selector is longer than ${MAX_SELECTOR_LENGTH} characters.` };
+  }
+  if (!ALLOWED_CHARS.test(selector)) {
+    return {
+      ok: false,
+      reason: 'Selector contains characters that are not allowed (for example \\ { } ; < @ /).',
+    };
+  }
+  let balance = 0;
+  for (const ch of selector) {
+    if (ch === '(' || ch === '[') balance++;
+    if (ch === ')' || ch === ']') balance--;
+    if (balance < 0) return { ok: false, reason: 'Selector has unbalanced brackets.' };
+  }
+  if (balance !== 0) return { ok: false, reason: 'Selector has unbalanced brackets.' };
+
+  const pseudoMatches = selector.match(/::?[a-zA-Z-]+/g) ?? [];
+  for (const raw of pseudoMatches) {
+    if (raw.startsWith('::')) return { ok: false, reason: 'Pseudo-elements are not allowed.' };
+    const name = raw.slice(1).toLowerCase();
+    if (!ALLOWED_PSEUDOS.has(name)) {
+      return { ok: false, reason: `The pseudo-class ":${name}" is not allowed.` };
+    }
+  }
+
+  const parts = splitTopLevel(selector, ',');
+  if (parts.length > 3) return { ok: false, reason: 'Use at most 3 comma-separated selectors.' };
+  for (const part of parts) {
+    const compound = lastCompound(part);
+    if (!compound) return { ok: false, reason: 'Selector has an empty part.' };
+    const withoutNot = compound.replace(/:not\([^)]*\)/g, '');
+    if (!/[#.[]/.test(withoutNot)) {
+      return {
+        ok: false,
+        reason: 'Each selector must target an element by class, id or attribute.',
+      };
+    }
+    const tag = withoutNot.match(/^[a-zA-Z][a-zA-Z0-9-]*/)?.[0]?.toLowerCase();
+    if (tag && PROTECTED_TAGS.has(tag)) {
+      return { ok: false, reason: `Rules may not target <${tag}> elements.` };
+    }
+    if (/^\*/.test(withoutNot) && !/[#.[]/.test(withoutNot.slice(1))) {
+      return { ok: false, reason: 'Universal selectors are not allowed.' };
+    }
+  }
+  return { ok: true };
+}
+
+/** Syntax check using the DOM, when one exists (UI pages and content scripts). */
+export function isSyntacticallyValidSelector(selector: string, doc?: Document): boolean {
+  const d = doc ?? (typeof document !== 'undefined' ? document : undefined);
+  if (!d) return true;
+  try {
+    d.createDocumentFragment().querySelector(selector);
+    return true;
+  } catch {
+    return false;
+  }
+}

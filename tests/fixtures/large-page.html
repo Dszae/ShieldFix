@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fixture: large page (performance)</title>
+    <link rel="stylesheet" href="site.css" />
+  </head>
+  <body>
+    <header class="site">Big Portal</header>
+    <main id="feed"></main>
+    <script>
+      // About 7,000 elements of ordinary content.
+      const feed = document.getElementById('feed');
+      for (let i = 0; i < 1000; i++) {
+        const card = document.createElement('section');
+        card.className = 'card card-' + (i % 7);
+        const h = document.createElement('h3');
+        h.textContent = 'Story ' + i;
+        const p = document.createElement('p');
+        p.append('Lorem ipsum dolor sit amet, ');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = 'link';
+        p.append(a, ' consectetur adipiscing elit.');
+        const ul = document.createElement('ul');
+        ul.append(document.createElement('li'), document.createElement('li'));
+        card.append(h, p, ul);
+        feed.appendChild(card);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+/* Shared look for fixture pages: an ordinary news-style site. */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font:
+    16px/1.6 Georgia,
+    serif;
+  color: #1f2328;
+  background: #fafafa;
+}
+header.site {
+  background: #222;
+  color: #fff;
+  padding: 14px 24px;
+  font:
+    600 18px system-ui,
+    sans-serif;
+}
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #fff;
+  min-height: 2400px;
+}
+h1 {
+  font-size: 30px;
+  line-height: 1.2;
+}
+.modal-btn {
+  font: 600 14px system-ui;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: 0;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
