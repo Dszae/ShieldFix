@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { AnnouncerContext, type Announce } from './announcerContext';
 
-/** Screen-reader status announcements through visually hidden live regions. */
 export function AnnouncerProvider({ children }: { children: ReactNode }) {
   const [polite, setPolite] = useState('');
   const [assertive, setAssertive] = useState('');
@@ -10,7 +9,6 @@ export function AnnouncerProvider({ children }: { children: ReactNode }) {
   const announce = useCallback<Announce>((message, tone = 'polite') => {
     const set = tone === 'assertive' ? setAssertive : setPolite;
     set('');
-    // Re-setting after a tick makes repeated identical messages announce again.
     if (timer.current !== null) window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => set(message), 60);
   }, []);

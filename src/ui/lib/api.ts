@@ -13,7 +13,6 @@ export class ApiError extends Error {
   }
 }
 
-/** Typed request to the background service worker. */
 export async function send<T extends UiRequestInput['type']>(
   message: Extract<UiRequestInput, { type: T }>,
 ): Promise<UiResponseMap[T]> {
@@ -38,7 +37,6 @@ export function errorMessage(err: unknown): string {
   return 'Something went wrong.';
 }
 
-/** Permission requests must run synchronously inside a click handler. */
 export function requestOrigins(origins: string[]): Promise<boolean> {
   return chrome.permissions.request({ origins }).catch(() => false);
 }

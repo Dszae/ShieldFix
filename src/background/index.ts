@@ -10,11 +10,6 @@ import {
   chromeTabs,
 } from './gateways';
 
-/**
- * Service worker entry point. All listeners are registered synchronously at the
- * top level, as Manifest V3 requires, so events wake the worker reliably.
- */
-
 const repo = new Repository(chromeArea(chrome.storage.local));
 const router = createRouter({
   extensionId: chrome.runtime.id,
@@ -58,7 +53,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     .handle(message, sender)
     .then(sendResponse)
     .catch((err) => sendResponse({ ok: false, error: { code: 'internal', message: String(err) } }));
-  return true; // async response
+  return true;
 });
 
 chrome.permissions.onAdded.addListener((permissions) => {

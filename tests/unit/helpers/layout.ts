@@ -1,10 +1,5 @@
 import type { LayoutProbe, Rect } from '../../../src/detection/layout';
 
-/**
- * A layout probe for DOM environments without a layout engine (happy-dom).
- * Tests assign rectangles explicitly; computed styles come from the DOM.
- * Elements without an assigned rectangle behave like ordinary in-flow content.
- */
 export class FakeLayout {
   private rects = new Map<Element, Rect>();
   viewport = { width: 1280, height: 800 };

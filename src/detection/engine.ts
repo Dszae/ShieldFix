@@ -61,10 +61,8 @@ export interface ScanResult {
 export interface ScanOptions {
   doc: Document;
   probe: LayoutProbe;
-  /** Elements to ignore entirely (ShieldFix's own in-page UI). */
   ignore?: (el: Element) => boolean;
   rules?: ContentRuleConfig[];
-  /** Elements inserted after the initial page load. */
   lateInserted?: WeakSet<Element>;
 }
 
@@ -83,10 +81,6 @@ export function levelFor(confidence: number): DetectionLevel {
 export function isAntiAdblock(c: Classification): boolean {
   return c.startsWith('anti-adblock');
 }
-
-/* ------------------------------------------------------------------ */
-/* Seed collection                                                     */
-/* ------------------------------------------------------------------ */
 
 function addSeed(seeds: Map<Element, SeedInfo>, el: Element, patch?: Partial<SeedInfo>): void {
   let info = seeds.get(el);
@@ -108,7 +102,6 @@ function collectSeeds(
   const body = doc.body;
   if (!body) return seeds;
 
-  // 1. Text mentions (bounded walk over text nodes).
   const walker = doc.createTreeWalker(body, NodeFilter.SHOW_TEXT);
   let chars = 0;
   let textSeeds = 0;
@@ -125,15 +118,12 @@ function collectSeeds(
     }
   }
 
-  // 2. Anti-adblock class / id patterns.
   const attrMatches = Array.from(doc.querySelectorAll(ATTRIBUTE_SEED_SELECTOR)).slice(0, 100);
   for (const el of attrMatches) if (!ignore(el)) addSeed(seeds, el);
 
-  // 3. Dialogs, so ordinary dialogs can be recognised and excluded.
   const dialogs = Array.from(doc.querySelectorAll(DIALOG_SEED_SELECTOR)).slice(0, 50);
   for (const el of dialogs) if (!ignore(el)) addSeed(seeds, el);
 
-  // 4. Whatever sits on top of the viewport at a few sample points.
   const { width: vw, height: vh } = probe.viewport();
   const points: [number, number][] = [
     [0.5, 0.5],
@@ -148,14 +138,12 @@ function collectSeeds(
     if (top) addSeed(seeds, top);
   }
 
-  // 5. Vendor signatures.
   for (const v of VENDOR_SIGNATURES) {
     for (const el of Array.from(doc.querySelectorAll(v.selector)).slice(0, 3)) {
       if (!ignore(el)) addSeed(seeds, el, { vendor: v.id });
     }
   }
 
-  // 6. User-enabled compatibility rules for this site.
   for (const rule of opts.rules ?? []) {
     let matches: Element[];
     try {
@@ -173,10 +161,6 @@ function collectSeeds(
   return seeds;
 }
 
-/* ------------------------------------------------------------------ */
-/* Root resolution                                                     */
-/* ------------------------------------------------------------------ */
-
 function isDialogLike(el: Element): boolean {
   return (
     el.tagName === 'DIALOG' ||
@@ -186,8 +170,6 @@ function isDialogLike(el: Element): boolean {
   );
 }
 
-// Per-scan memo: ancestors are shared by many seeds, and measuring a large
-// subtree is O(n), so each element is measured at most once per scan.
 let textLengthMemo = new Map<Element, number>();
 let shellMemo = new Map<Element, boolean>();
 
@@ -200,7 +182,6 @@ function textLength(el: Element): number {
   return n;
 }
 
-/** An element that hosts the page's main content (app shells, layout wrappers). */
 function isContentShell(el: Element): boolean {
   let shell = shellMemo.get(el);
   if (shell === undefined) {
@@ -218,7 +199,7 @@ function resolveRoot(seed: Element, opts: ScanOptions): Element | null {
   const { doc, probe } = opts;
   const html = doc.documentElement;
   const body = doc.body;
-  const positioned: Element[] = []; // innermost first
+  const positioned: Element[] = [];
   let dialog: Element | null = null;
   let largeAbsolute: Element | null = null;
   const { width: vw, height: vh } = probe.viewport();
@@ -235,7 +216,6 @@ function resolveRoot(seed: Element, opts: ScanOptions): Element | null {
     el = el.parentElement;
   }
 
-  // Prefer the outermost fixed/sticky ancestor that is not an app shell.
   for (let i = positioned.length - 1; i >= 0; i--) {
     const candidate = positioned[i]!;
     if (isRendered(candidate, probe) && !isContentShell(candidate)) return candidate;
@@ -243,7 +223,6 @@ function resolveRoot(seed: Element, opts: ScanOptions): Element | null {
   if (largeAbsolute && !isContentShell(largeAbsolute)) return largeAbsolute;
   if (dialog && !isContentShell(dialog)) return dialog;
 
-  // Inline: grow from the seed to a small containing block.
   let root: Element = seed;
   for (let depth = 0; depth < 4; depth++) {
     const parent: Element | null = root.parentElement;
@@ -253,10 +232,6 @@ function resolveRoot(seed: Element, opts: ScanOptions): Element | null {
   }
   return root === body || root === html ? null : root;
 }
-
-/* ------------------------------------------------------------------ */
-/* Scoring                                                             */
-/* ------------------------------------------------------------------ */
 
 function geometryOf(el: Element, probe: LayoutProbe): { geometry: Geometry; z: number } {
   const s = probe.style(el);
@@ -340,7 +315,7 @@ function findBackdrops(root: Element, opts: ScanOptions): Element[] {
     const opacity = Number.parseFloat(s.opacity || '1');
     const hasBackdropFilter = !!s.backdropFilter && s.backdropFilter !== 'none';
     if (alpha < 0.05 && !hasBackdropFilter) continue;
-    if (alpha >= 0.99 && opacity >= 0.99 && !hasBackdropFilter) continue; // opaque: a page layer, not a scrim
+    if (alpha >= 0.99 && opacity >= 0.99 && !hasBackdropFilter) continue;
     result.push(el);
   }
   return result;
@@ -363,7 +338,6 @@ function scoreRoot(root: Element, ctx: ScoreContext): CandidateResult {
   const { geometry, z } = geometryOf(root, probe);
   const isOverlay = geometry === 'fullscreen' || geometry === 'modal';
 
-  // Positive evidence -----------------------------------------------------
   const strong = STRONG_PHRASES.filter((p) => p.re.test(text));
   if (strong.length > 0) {
     add('phrase-strong', strong[0]!.label, 50);
@@ -397,13 +371,11 @@ function scoreRoot(root: Element, ctx: ScoreContext): CandidateResult {
     add('late-insert', 'Appeared after the page loaded', 5);
   }
 
-  // Media players often show the warning in place of the video.
   const media = root.querySelector('video, audio, iframe, canvas, object, embed');
   if (media && strong.length > 0) add('media-player', 'Shown in a media player', 10);
   const failedVideo = Array.from(root.querySelectorAll('video')).some((v) => v.error !== null);
   if (failedVideo) add('video-error', 'The video failed to load', 10);
 
-  // Negative evidence and vetoes ------------------------------------------
   if (NEGATED_RE.test(text)) add('negated', 'Says ad blockers are fine', -40);
 
   const consent = CONSENT_RE.test(text);
@@ -442,7 +414,6 @@ function scoreRoot(root: Element, ctx: ScoreContext): CandidateResult {
     vetoes.push({ id: 'main-content', label: 'Contains the main page content' });
   }
   if (fullLength > 1500) add('long-text', 'Long text (likely an article)', -30);
-  // Prose about ad blockers inside an article is not a warning; a player widget is not prose.
   if (geometry === 'inline' && !media && root.closest('article, main, [role="main"]')) {
     add('in-article', 'Part of the article text', -30);
   }
@@ -455,7 +426,6 @@ function scoreRoot(root: Element, ctx: ScoreContext): CandidateResult {
     ),
   );
 
-  // User-enabled rule --------------------------------------------------------
   let ruleId: string | null = null;
   const ruleConfig = (ctx.opts.rules ?? []).find((r) => ctx.seed.ruleIds.has(r.id));
   if (ruleConfig) {
@@ -465,7 +435,6 @@ function scoreRoot(root: Element, ctx: ScoreContext): CandidateResult {
       confidence = Math.max(confidence, Math.min(100, ruleConfig.confidence));
   }
 
-  // Classification -------------------------------------------------------------
   const evidence = anyEvidence || !!ruleId;
   let classification: Classification;
   if (evidence && confidence >= THRESHOLDS.possible && !subscription && !ageGate) {
@@ -485,7 +454,6 @@ function scoreRoot(root: Element, ctx: ScoreContext): CandidateResult {
   const antiAdblock = isAntiAdblock(classification);
   if (!antiAdblock) confidence = Math.min(confidence, THRESHOLDS.possible - 1);
 
-  // Fixability ------------------------------------------------------------------
   let fixBlockedReason: string | null = null;
   if (!antiAdblock) fixBlockedReason = 'Not identified as an anti-adblock warning.';
   else if (vetoes.length > 0)
@@ -518,10 +486,6 @@ function isLate(el: Element, late: WeakSet<Element>): boolean {
   }
   return false;
 }
-
-/* ------------------------------------------------------------------ */
-/* Page state                                                          */
-/* ------------------------------------------------------------------ */
 
 export function readPageState(opts: ScanOptions): PageState {
   const { doc, probe } = opts;
@@ -568,10 +532,6 @@ export function readPageState(opts: ScanOptions): PageState {
   return { scrollLocked, blurred, inert, pointerBlocked, videoErrors };
 }
 
-/* ------------------------------------------------------------------ */
-/* Entry point                                                         */
-/* ------------------------------------------------------------------ */
-
 export function scanDocument(opts: ScanOptions): ScanResult {
   textLengthMemo = new Map();
   shellMemo = new Map();
@@ -602,7 +562,6 @@ function runScan(opts: ScanOptions): ScanResult {
     }
   }
 
-  // Merge nested roots into their outermost container.
   const rootList = Array.from(roots.keys());
   for (const inner of rootList) {
     const outer = rootList.find((o) => o !== inner && roots.has(o) && o.contains(inner));
@@ -619,7 +578,6 @@ function runScan(opts: ScanOptions): ScanResult {
     .slice(0, 60)
     .map(([root, seed]) => scoreRoot(root, { opts, page, seed }));
 
-  // A warning's own backdrop is part of that warning, not a separate dialog.
   const warningBackdrops = new Set(
     scored.filter((c) => isAntiAdblock(c.classification)).flatMap((c) => c.backdrops),
   );

@@ -35,11 +35,6 @@ const KEYS = {
 
 type Clock = () => number;
 
-/**
- * Typed, validated access to persistent extension data (chrome.storage.local).
- * Everything is stored locally; nothing here is synchronised or uploaded.
- * Corrupt or outdated records are dropped individually rather than failing reads.
- */
 export class Repository {
   private readonly mutex = new Mutex();
 
@@ -48,14 +43,11 @@ export class Repository {
     private readonly now: Clock = Date.now,
   ) {}
 
-  /* -------------------------------- lifecycle ------------------------------- */
-
   async migrate(): Promise<void> {
     await this.mutex.run(async () => {
       const raw = await this.area.get([KEYS.schemaVersion]);
       const version = typeof raw[KEYS.schemaVersion] === 'number' ? raw[KEYS.schemaVersion] : 0;
       if (version === SCHEMA_VERSION) return;
-      // Version 0 -> 1: initial schema. Future migrations go here, in order.
       await this.area.set({ [KEYS.schemaVersion]: SCHEMA_VERSION });
     });
   }
@@ -66,8 +58,6 @@ export class Repository {
       await this.area.set({ [KEYS.schemaVersion]: SCHEMA_VERSION });
     });
   }
-
-  /* -------------------------------- settings -------------------------------- */
 
   async getSettings(): Promise<Settings> {
     const raw = await this.area.get([KEYS.settings]);
@@ -83,8 +73,6 @@ export class Repository {
       return next;
     });
   }
-
-  /* ---------------------------------- sites --------------------------------- */
 
   private async readSites(): Promise<Record<string, SiteRecord>> {
     const raw = (await this.area.get([KEYS.sites]))[KEYS.sites];
@@ -129,10 +117,6 @@ export class Repository {
     });
   }
 
-  /**
-   * Records a scan outcome on the site's summary. Sites without saved preferences
-   * are only recorded when history is enabled and something was detected.
-   */
   async recordScan(
     hostname: string,
     scan: { level: SiteRecord['lastLevel']; confidence: number; fixApplied?: boolean },
@@ -169,8 +153,6 @@ export class Repository {
     await this.mutex.run(() => this.area.set({ [KEYS.sites]: {} }));
   }
 
-  /* ---------------------------------- rules --------------------------------- */
-
   private async readRules(): Promise<Rule[]> {
     const raw = (await this.area.get([KEYS.rules]))[KEYS.rules];
     if (!Array.isArray(raw)) return [];
@@ -206,7 +188,6 @@ export class Repository {
     return this.readRules();
   }
 
-  /** Create a rule, or save a new version of an existing one (keeping history). */
   async upsertRule(input: RuleInput, source: Rule['source'] = 'user'): Promise<Rule> {
     return this.mutex.run(async () => {
       const rules = await this.readRules();
@@ -246,7 +227,6 @@ export class Repository {
     });
   }
 
-  /** Restore the most recent previous version of a rule. */
   async rollbackRule(id: string): Promise<Rule> {
     return this.mutex.run(async () => {
       const rules = await this.readRules();
@@ -321,8 +301,6 @@ export class Repository {
     };
   }
 
-  /* --------------------------------- history -------------------------------- */
-
   async listHistory(): Promise<HistoryEntry[]> {
     const raw = (await this.area.get([KEYS.history]))[KEYS.history];
     if (!Array.isArray(raw)) return [];
@@ -356,8 +334,6 @@ export class Repository {
   async clearHistory(): Promise<void> {
     await this.mutex.run(() => this.area.set({ [KEYS.history]: [] }));
   }
-
-  /* -------------------------------- onboarding ------------------------------- */
 
   async getOnboarding(): Promise<Onboarding> {
     const raw = (await this.area.get([KEYS.onboarding]))[KEYS.onboarding];

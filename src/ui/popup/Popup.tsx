@@ -234,7 +234,6 @@ export function Popup() {
     if (!host) return;
     const patterns = originPatternsFor(host);
     setBusy('monitor');
-    // The permission request must start synchronously in the click handler.
     const permission = enable ? requestOrigins(patterns) : Promise.resolve(true);
     void permission
       .then(async (granted) => {

@@ -25,7 +25,6 @@ export function Privacy() {
   const announce = useAnnounce();
   const { update, error, setError, busy } = useSettingsUpdater();
   const [confirm, setConfirm] = useState<'reset' | 'revoke' | null>(null);
-  // Required host permissions (none in release builds) cannot be revoked at runtime.
   const required = new Set(chrome.runtime.getManifest().host_permissions ?? []);
   const siteOrigins = info.grantedOrigins.filter((o) => o.includes('://') && !required.has(o));
 

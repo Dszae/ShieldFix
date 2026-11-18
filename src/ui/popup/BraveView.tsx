@@ -6,10 +6,6 @@ import { Button } from '../components/Button';
 import { Alert } from '../components/Feedback';
 import { ViewHeader } from './ViewHeader';
 
-/**
- * Guidance for native browser controls. Extensions cannot read or change Brave
- * Shields, so ShieldFix explains the steps instead of pretending to act.
- */
 export function BraveView({
   hostname,
   hasFix,

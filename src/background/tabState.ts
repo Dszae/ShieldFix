@@ -9,16 +9,11 @@ import type { StorageArea } from '../storage/area';
 const TabRecordSchema = z.object({
   hostname: z.string(),
   report: DetectionReportSchema.nullable(),
-  /** Last level written to history for this page load (de-duplicates history). */
   recordedLevel: DetectionLevelSchema.nullable(),
   recordedFix: z.boolean(),
 });
 export type TabRecord = z.infer<typeof TabRecordSchema>;
 
-/**
- * Per-tab state kept in chrome.storage.session (memory only, cleared when the
- * browser closes) so it survives service-worker restarts.
- */
 export class TabStateStore {
   constructor(private readonly area: StorageArea) {}
 

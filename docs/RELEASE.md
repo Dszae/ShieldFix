@@ -31,8 +31,8 @@ listing, and is a major version.
    - [ ] Brave’s extension page shows no errors for ShieldFix.
 7. **Package:** `npm run package` → `release/shieldfix-<version>.zip` and `.sha256`. The script refuses version
    mismatches and test builds.
-8. **Store assets (if UI changed):** `npm run build:e2e && node scripts/store-assets.mjs` regenerates
-   `store-assets/` (1280×800 screenshots plus popup/dashboard previews).
+8. **Store assets (if UI changed):** `npm run store-assets` regenerates
+   `store-assets/` (five 1280×800 screenshots and the promo tiles).
 9. **Tag and publish:** tag `v<version>`, attach the zip and checksum to the release, and submit the zip to stores.
 
 ## Chrome Web Store submission notes
@@ -45,7 +45,7 @@ ShieldFix is prepared for, but has not been through, Chrome Web Store review. Wh
 - **Data usage:** no data collected; certify compliance with the developer program policies only after reviewing them
   for the current submission.
 - **Privacy policy URL:** host [PRIVACY.md](../PRIVACY.md) at a public URL.
-- Listing text: see [STORE_LISTING.md](STORE_LISTING.md).
+- Field-by-field values and listing text: see [STORE_LISTING.md](STORE_LISTING.md).
 
 Store policies change; review the current Chrome Web Store program policies (in particular those on ad blockers and on
 modifying third-party sites) before each submission. Brave installs extensions from the Chrome Web Store.

@@ -1,8 +1,4 @@
 #!/usr/bin/env node
-/**
- * Packages dist/ into release/shieldfix-<version>.zip for distribution and prints
- * its SHA-256. Refuses to package a test build. Pure Node (no zip dependency).
- */
 import { createHash } from 'node:crypto';
 import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
@@ -46,7 +42,6 @@ async function walk(dir) {
   return out;
 }
 
-// Fixed timestamp (2025-01-01 00:00) so identical inputs produce identical archives.
 const DOS_TIME = 0;
 const DOS_DATE = ((2025 - 1980) << 9) | (1 << 5) | 1;
 
@@ -61,8 +56,8 @@ for (const file of await walk(dist)) {
   const local = Buffer.alloc(30);
   local.writeUInt32LE(0x04034b50, 0);
   local.writeUInt16LE(20, 4);
-  local.writeUInt16LE(0x0800, 6); // UTF-8 names
-  local.writeUInt16LE(8, 8); // deflate
+  local.writeUInt16LE(0x0800, 6);
+  local.writeUInt16LE(8, 8);
   local.writeUInt16LE(DOS_TIME, 10);
   local.writeUInt16LE(DOS_DATE, 12);
   local.writeUInt32LE(crc, 14);

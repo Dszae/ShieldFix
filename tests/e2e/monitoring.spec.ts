@@ -17,7 +17,7 @@ test.describe('automatic monitoring', () => {
     await page.goto(fixture('dynamic-overlay'));
     const notice = page.locator('shieldfix-notice');
     await expect(notice.getByText('Ad-blocker warning detected')).toBeVisible({ timeout: 10_000 });
-    await expect(page.locator('#dyn-wall')).toBeVisible(); // nothing changes without approval
+    await expect(page.locator('#dyn-wall')).toBeVisible();
 
     await notice.getByRole('button', { name: 'Hide warning' }).click();
     await expect(page.locator('#dyn-wall')).toBeHidden();
@@ -33,7 +33,6 @@ test.describe('automatic monitoring', () => {
       expect.arrayContaining(['detected', 'fix-applied', 'fix-reverted']),
     );
     expect(history.every((h) => h.hostname === '127.0.0.1')).toBe(true);
-    // History holds no URLs or page text.
     expect(JSON.stringify(history)).not.toContain('dynamic-overlay');
     expect(JSON.stringify(history)).not.toContain('adblocker');
   });

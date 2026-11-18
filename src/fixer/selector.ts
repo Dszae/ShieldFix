@@ -1,12 +1,5 @@
 import { checkSelectorSafety } from '../compat/selectorSafety';
 
-/**
- * Builds a selector that identifies an element across page loads, for saving a
- * user-approved fix as a compatibility rule. Generated class names (CSS modules,
- * styled-components, hashes) change between builds, so they are skipped; when no
- * stable, unique selector exists, `null` is returned and no rule is offered.
- */
-
 const PROTECTED = new Set(['html', 'head', 'body', 'main']);
 
 export function isStableToken(token: string): boolean {
@@ -17,7 +10,7 @@ export function isStableToken(token: string): boolean {
   if (/^(?:css|sc|jsx|emotion|svelte|tw)-/i.test(token)) return false;
   if (/(?:^|[_-])[A-Za-z0-9]{5,}$/.test(token) && /[A-Z]/.test(token) && /\d/.test(token))
     return false;
-  if (/__[A-Za-z0-9]{5}$/.test(token)) return false; // CSS modules: name__hash5
+  if (/__[A-Za-z0-9]{5}$/.test(token)) return false;
   return true;
 }
 
@@ -55,7 +48,6 @@ export function stableSelector(el: Element, doc: Document): string | null {
     }
   } else if (parent && own) {
     const combined = `${parent.tagName.toLowerCase()} > ${own}`;
-    // e.g. "body > div.adblock-wall" — allowed because the final compound has a class.
     if (accept(combined)) return combined;
   }
   return null;

@@ -24,7 +24,7 @@ export function SettingsSection() {
   const setAllSites = (enable: boolean) => {
     setBusy('monitorAllSites');
     setError(null);
-    const permission = enable ? requestOrigins([...ALL_SITES_ORIGINS]) : Promise.resolve(true); // in the click
+    const permission = enable ? requestOrigins([...ALL_SITES_ORIGINS]) : Promise.resolve(true);
     void permission
       .then(async (granted) => {
         if (!granted) {

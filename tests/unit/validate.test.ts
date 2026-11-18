@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { parseToContent } from '../../src/content/validate';
 import { ToContentSchema } from '../../src/shared/messages';
 
-/** The content script's dependency-free validator must agree with the Zod schema. */
 const samples: unknown[] = [
   { type: 'cs/ping' },
   { type: 'cs/state' },

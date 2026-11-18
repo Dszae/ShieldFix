@@ -1,10 +1,5 @@
 import { NOTICE_HOST_ATTR } from '../shared/constants';
 
-/**
- * Small in-page notice rendered in a shadow root so page styles cannot affect it
- * and it cannot affect the page. Only shown on sites the user chose to monitor.
- */
-
 export type NoticeView =
   | { kind: 'detected'; fixable: boolean; level: 'likely' | 'high' }
   | { kind: 'applied'; auto: boolean; verified: boolean }
@@ -48,7 +43,6 @@ button:focus-visible { outline: 2px solid #0f766e; outline-offset: 2px; }
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-/** Built with DOM APIs (no innerHTML) so it works on pages that enforce Trusted Types. */
 function shieldIcon(doc: Document): SVGSVGElement {
   const svg = doc.createElementNS(SVG_NS, 'svg');
   for (const [k, v] of Object.entries({
@@ -146,7 +140,6 @@ export class Notice {
     root.appendChild(box);
 
     if (view.kind !== 'detected') {
-      // Informational notices fade out, but never while the user is interacting with them.
       let interacting = false;
       box.addEventListener('mouseenter', () => (interacting = true));
       box.addEventListener('mouseleave', () => (interacting = false));

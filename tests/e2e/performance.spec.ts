@@ -1,10 +1,6 @@
 import type { DetectionReport } from '../../src/shared/schemas';
 import { expect, fixture, openFixture, test } from './fixtures';
 
-/**
- * Measured, not assumed. Budgets are deliberately generous to avoid flaky CI;
- * the measured values are printed and recorded in docs/TESTING.md.
- */
 test.describe('performance', () => {
   test('scan time on typical and large pages', async ({ context, ext }, testInfo) => {
     const results: Record<string, number[]> = {};
@@ -48,7 +44,7 @@ test.describe('performance', () => {
       'content state ok:',
       ping?.ok,
     );
-    expect(ping?.ok).toBe(true); // the monitor really was running
+    expect(ping?.ok).toBe(true);
     if (longTasks !== null) expect(longTasks.length).toBe(0);
   });
 });

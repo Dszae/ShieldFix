@@ -1,10 +1,5 @@
 import { expect, openFixture, test } from './fixtures';
 
-/**
- * The popup is opened as a tab with ?tabId= pointing at the fixture page. In real
- * use the toolbar button opens it and grants activeTab; the E2E build instead has
- * host access to 127.0.0.1 (see docs/TESTING.md).
- */
 test.describe('popup', () => {
   test('scans on open, reviews and applies a fix, then undoes it', async ({ context, ext }) => {
     const { page, tabId } = await openFixture(context, ext, 'fullscreen-modal');
@@ -20,7 +15,6 @@ test.describe('popup', () => {
     const changes = popup.getByRole('list', { name: 'Proposed changes' });
     await expect(changes.getByText(/Hide the overlay div#adb-wall/)).toBeVisible();
     await expect(changes.getByText(/Restore scrolling/).first()).toBeVisible();
-    // Nothing is changed before approval.
     await expect(page.locator('#adb-wall')).toBeVisible();
 
     await popup.getByRole('button', { name: 'Apply reversible fix' }).click();
@@ -60,12 +54,11 @@ test.describe('popup', () => {
     ]);
 
     await page.reload();
-    await expect(page.locator('#adb-wall')).toBeVisible(); // reload restores the page
+    await expect(page.locator('#adb-wall')).toBeVisible();
     await popup.reload();
     await expect(popup.getByLabel('Page status').getByText('Saved fix applied')).toBeVisible();
     await expect(page.locator('#adb-wall')).toBeHidden();
 
-    // "Undo and stop fixing this site" disables the rule.
     await popup.getByRole('button', { name: 'Undo and stop fixing this site' }).click();
     await expect(page.locator('#adb-wall')).toBeVisible();
     const after = await ext.data<{ enabled: boolean }[]>({ type: 'rules/list' });

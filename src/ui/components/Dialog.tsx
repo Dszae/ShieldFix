@@ -1,10 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Button } from './Button';
 
-/**
- * Modal built on the native <dialog> element: focus trapping, Escape to close
- * and inert background are provided by the browser.
- */
 export function Modal({
   open,
   onClose,
@@ -43,7 +39,7 @@ export function Modal({
         onClose();
       }}
       onClick={(e) => {
-        if (e.target === ref.current) onClose(); // click on backdrop
+        if (e.target === ref.current) onClose();
       }}
       className={`m-auto w-[calc(100%-32px)] ${width} rounded-xl border border-line bg-surface p-0 text-fg shadow-pop backdrop:backdrop-blur-[1px]`}
     >

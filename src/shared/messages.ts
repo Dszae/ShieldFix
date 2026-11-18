@@ -18,10 +18,6 @@ import {
 import type { UrlInfo } from './domain';
 import { errorEnvelope, fail, type Envelope } from './envelope';
 
-/* ------------------------------------------------------------------ */
-/* Extension pages (popup, dashboard) -> background                    */
-/* ------------------------------------------------------------------ */
-
 const TabId = z.number().int().min(0);
 const CandidateId = z.string().regex(/^c\d{1,6}$/);
 
@@ -147,10 +143,6 @@ export interface UiResponseMap {
   'brave/open': { opened: string };
 }
 
-/* ------------------------------------------------------------------ */
-/* Content script -> background                                        */
-/* ------------------------------------------------------------------ */
-
 export const ContentRequestSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('content/config') }),
   z.object({ type: z.literal('content/report'), report: DetectionReportSchema }),
@@ -185,10 +177,6 @@ export interface ContentResponseMap {
   'content/fixEvent': null;
   'content/openPopup': { opened: boolean };
 }
-
-/* ------------------------------------------------------------------ */
-/* Background -> content script                                        */
-/* ------------------------------------------------------------------ */
 
 export const ToContentSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('cs/ping') }),
@@ -233,10 +221,6 @@ export interface ToContentResponseMap {
   'cs/revertFix': ContentRevertResult;
   'cs/configChanged': null;
 }
-
-/* ------------------------------------------------------------------ */
-/* Envelope                                                            */
-/* ------------------------------------------------------------------ */
 
 export { ShieldFixError, ok, fail, type ErrorCode, type Envelope } from './envelope';
 

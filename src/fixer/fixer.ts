@@ -3,16 +3,6 @@ import type { FixActionKind, FixActionSummary } from '../shared/schemas';
 import type { CandidateResult, PageState } from '../detection/engine';
 import { describeElement } from '../detection/layout';
 
-/**
- * Reversible cosmetic fixes.
- *
- * Every change is an inline style property set with `!important` (or a dialog
- * close / `inert` removal). The previous value and priority of each property are
- * recorded so that `revert()` restores exactly what was there — without touching
- * properties the page changed for its own reasons in the meantime. Nothing is
- * removed from the DOM, so page scripts and event listeners keep working.
- */
-
 export interface PlannedAction {
   kind: FixActionKind;
   el: Element;
@@ -51,7 +41,6 @@ export function planFix(
     });
   }
 
-  // Page-level side effects only accompany overlays, which are what cause them.
   const isOverlay = candidate.geometry === 'fullscreen' || candidate.geometry === 'modal';
   if (isOverlay) {
     if (page.scrollLocked) {
@@ -167,7 +156,6 @@ export class FixSession {
         }
         break;
       case 'unlock-scroll':
-        // Only the vertical axis: horizontal clipping is usually intentional.
         this.setStyle(el, 'overflow-y', 'auto');
         break;
       case 'unfix-body': {
@@ -213,7 +201,6 @@ export class FixSession {
     el.style.setProperty(prop, target, 'important');
   }
 
-  /** Pages sometimes undo cosmetic fixes; re-assert ours (bounded) while active. */
   private observe(): void {
     const targets = new Set<Element>();
     for (const c of this.changes) targets.add(c.type === 'style' ? c.record.el : c.el);
@@ -301,7 +288,6 @@ export class FixSession {
 function isRenderedFresh(el: Element, win: Window & typeof globalThis): boolean {
   const s = win.getComputedStyle(el);
   if (s.display === 'none' || s.visibility === 'hidden') return false;
-  // Also hidden if any ancestor is display:none.
   for (let cur = el.parentElement; cur; cur = cur.parentElement) {
     if (win.getComputedStyle(cur).display === 'none') return false;
   }

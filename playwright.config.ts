@@ -1,9 +1,5 @@
 import { defineConfig } from '@playwright/test';
 
-/**
- * Browser tests load the E2E build (dist-e2e/, created by `npm run build:e2e`)
- * into Playwright's Chromium. Set BRAVE_PATH to also run the suite in Brave.
- */
 const projects: NonNullable<Parameters<typeof defineConfig>[0]['projects']> = [
   { name: 'chromium', use: { browserName: 'chromium' } },
 ];

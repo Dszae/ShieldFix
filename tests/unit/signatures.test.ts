@@ -22,6 +22,9 @@ describe('strong phrases', () => {
     ['Whitelist this website', 'whitelist-site'],
     ['Please add us to your allowlist', 'whitelist-site'],
     ['Turn off ad blocking', 'disable-adblock'],
+    ['Please Turnoff Adblocker', 'disable-adblock'],
+    ['Refresh the page after disabling your Adblocker', 'disable-adblock'],
+    ['Please Turnoff Adblocker or Brave Shields', 'lower-shields'],
     ['We noticed you’re using an ad blocker', 'we-noticed-adblock'],
     ["It looks like you're using an ad blocker", 'using-adblock'],
     ['Please allow ads on our site', 'allow-ads'],
@@ -36,7 +39,7 @@ describe('strong phrases', () => {
   it.each([
     'Block this user',
     'The roadblock ahead was cleared',
-    'Download our adblock-friendly app', // mention, not a warning
+    'Download our adblock-friendly app',
     'Head-block design pattern',
   ])('"%s" is not a strong match', (text) => {
     expect(strong(text)).toEqual([]);

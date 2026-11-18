@@ -1,8 +1,3 @@
-/**
- * Response envelope shared by all extension messaging. Kept free of runtime
- * dependencies so the content script stays small.
- */
-
 export type ErrorCode =
   | 'invalid-request'
   | 'forbidden'

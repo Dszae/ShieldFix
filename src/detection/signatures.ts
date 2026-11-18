@@ -1,11 +1,3 @@
-/**
- * Detection signatures. Text is normalised (lower case, collapsed whitespace,
- * typographic apostrophes replaced) before matching.
- *
- * Text matching alone never produces a high-confidence result; it is combined
- * with structural, geometric and page-state signals in `scoring.ts`.
- */
-
 export interface PhraseSignature {
   id: string;
   label: string;
@@ -26,7 +18,7 @@ export const STRONG_PHRASES: PhraseSignature[] = [
     id: 'disable-adblock',
     label: 'Asks to disable an ad blocker',
     re: new RegExp(
-      String.raw`\b(?:disable|turn off|deactivate|pause|switch off|remove|uninstall)\b[^.!?]{0,30}\b${AB}`,
+      String.raw`\b(?:disabl(?:e|ing)|turn(?:ing)? ?off|deactivat(?:e|ing)|paus(?:e|ing)|switch(?:ing)? off|remov(?:e|ing)|uninstall(?:ing)?)\b[^.!?]{0,30}\b${AB}`,
     ),
   },
   {
@@ -63,7 +55,7 @@ export const STRONG_PHRASES: PhraseSignature[] = [
   {
     id: 'lower-shields',
     label: 'Asks to lower browser privacy protection',
-    re: /\b(?:disable|turn off|lower|drop|switch off)\b[^.!?]{0,30}\b(?:shields|tracker blocking|tracking protection|privacy protection|content blocker)\b/,
+    re: /\b(?:disabl(?:e|ing)|turn(?:ing)? ?off|lower(?:ing)?|drop|switch(?:ing)? off)\b[^.!?]{0,30}\b(?:shields|tracker blocking|tracking protection|privacy protection|content blocker)\b/,
   },
   {
     id: 'adblock-detected-de',
@@ -82,15 +74,12 @@ export const STRONG_PHRASES: PhraseSignature[] = [
   },
 ];
 
-/** Weak mention: the text talks about ad blocking, but not necessarily as a warning. */
 export const MENTION_RE =
   /ad[\s\u00a0_-]?block|werbeblock|bloqueur de pub|bloqueador de anuncios|whitelist|allowlist|allow ads|\bshields\b|tracking protection|content blocker/i;
 
-/** Text the user is invited to click on anti-adblock walls. */
 export const CTA_RE =
   /\b(?:i(?:'ve| have) (?:disabled|turned off|whitelisted|allowed)|i disabled|disabled (?:it|my)|allow ads|whitelist|allowlist|continue without|turn off|try again|refresh|reload|i understand|ok,? i(?:'ll| will)|how (?:do i|to) disable)\b/;
 
-/** Negated or reassuring wording ("we don't mind ad blockers"). */
 export const NEGATED_RE = new RegExp(
   String.raw`\b(?:don't|do not|doesn't|does not|no need to|won't|will not|never)\b(?: have to| need to| ask you to| mind| require you to)?[^.!?]{0,20}\b(?:disable|turn off|mind|block|ask)\b[^.!?]{0,30}${AB}|\b${AB}s? (?:are|is) (?:fine|ok|okay|welcome)\b`,
 );
@@ -107,14 +96,9 @@ export const SUBSCRIPTION_RE =
 export const AGE_GATE_RE =
   /\b(?:are you (?:over )?(?:18|21)|verify your age|age verification|date of birth|you must be (?:18|21))\b/;
 
-/**
- * Class / id fragments used by anti-adblock scripts. The leading boundary avoids
- * matches like "head-block".
- */
 export const ANTI_ADBLOCK_ATTR_RE =
-  /(?:^|[^a-z])(?:anti[-_]?)?ad[-_]?block(?:er)?(?:[-_]?(?:notice|wall|modal|overlay|detect(?:ed|or)?|message|popup|warning|msg|alert))?(?:$|[^a-z])|(?:^|[^a-z])adb[-_](?:modal|overlay|notice|wall|popup|detect|message|warning)|blockadblock|detect[-_]?adblock|adblock[-_]?detect|(?:^|[^a-z])ab[-_](?:overlay|modal|wall)(?:$|[^a-z])/i;
+  /(?:^|[^a-z])(?:anti[-_]?)?ad[-_]?block(?:er)?(?:[-_]?(?:notice|wall|modal|overlay|detect(?:ed|or)?|message|popup|warning|msg|alert))?(?:$|[^a-z])|(?:^|[^a-z])adb[-_](?:modal|overlay|notice|wall|popup|detect|message|msg|note|warning|alert)|blockadblock|detect[-_]?adblock|adblock[-_]?detect|(?:^|[^a-z])ab[-_](?:overlay|modal|wall)(?:$|[^a-z])/i;
 
-/** Selectors for candidate discovery (attribute substring matches are cheap). */
 export const ATTRIBUTE_SEED_SELECTOR = [
   '[class*="adblock" i]',
   '[id*="adblock" i]',
@@ -131,11 +115,6 @@ export const ATTRIBUTE_SEED_SELECTOR = [
 export const DIALOG_SEED_SELECTOR =
   'dialog[open],[role="dialog"],[role="alertdialog"],[aria-modal="true"]';
 
-/**
- * Generic vendor signatures. These identify the anti-adblock component of widely
- * used ad-recovery products by their published root element. They are structural
- * hints only and are always combined with other signals.
- */
 export const VENDOR_SIGNATURES: { id: string; label: string; selector: string }[] = [
   {
     id: 'vendor-funding-choices',
@@ -144,7 +123,6 @@ export const VENDOR_SIGNATURES: { id: string; label: string; selector: string }[
   },
 ];
 
-/** Elements whose text is never page content worth scanning. */
 export const SKIP_TEXT_PARENTS = new Set([
   'SCRIPT',
   'STYLE',

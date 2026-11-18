@@ -132,7 +132,6 @@ test.describe('dashboard', () => {
     context,
     ext,
   }) => {
-    // Create some data first.
     const page0 = await context.newPage();
     await page0.goto('http://127.0.0.1:4173/fullscreen-modal.html');
     const tabId = await ext.tabIdFor('http://127.0.0.1:4173/fullscreen-modal.html');

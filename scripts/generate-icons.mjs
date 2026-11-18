@@ -1,9 +1,4 @@
 #!/usr/bin/env node
-/**
- * Renders the ShieldFix icon (vector source below) to PNG at every size the
- * manifest needs, using Playwright's Chromium. Run with `npm run icons`.
- * Small sizes use a simplified, heavier mark so they stay legible.
- */
 import { mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
