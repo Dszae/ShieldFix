@@ -1,12 +1,6 @@
 import type { ToContent } from '../shared/messages';
 import type { ScanTrigger } from '../shared/schemas';
 
-/**
- * Dependency-free validation of messages sent to the content script. Mirrors
- * `ToContentSchema` in shared/messages.ts (kept in sync by unit tests) so the
- * content script does not need to bundle Zod.
- */
-
 const TRIGGERS: ReadonlySet<ScanTrigger> = new Set(['popup', 'manual', 'monitor', 'mutation']);
 const CANDIDATE_ID = /^c\d{1,6}$/;
 

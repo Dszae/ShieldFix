@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/** Minimal static server for browser-test fixtures (127.0.0.1 only). */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { dirname, extname, join, normalize, resolve } from 'node:path';

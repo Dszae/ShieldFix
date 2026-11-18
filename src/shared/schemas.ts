@@ -2,10 +2,6 @@ import { z } from 'zod';
 import { checkSelectorSafety } from '../compat/selectorSafety';
 import { isValidHostname, normalizeHostname } from './domain';
 
-/* ------------------------------------------------------------------ */
-/* Detection                                                           */
-/* ------------------------------------------------------------------ */
-
 export const DetectionLevelSchema = z.enum(['none', 'possible', 'likely', 'high']);
 export type DetectionLevel = z.infer<typeof DetectionLevelSchema>;
 
@@ -44,7 +40,6 @@ export const CandidateSummarySchema = z.object({
   vetoes: z.array(VetoSchema).max(20),
   fixable: z.boolean(),
   fixBlockedReason: z.string().max(300).nullable(),
-  /** Structural description such as `div#adb-wall.modal` — never page text. */
   descriptor: z.string().max(200),
   ruleId: z.string().max(64).nullable(),
   geometry: z.enum(['fullscreen', 'modal', 'banner', 'inline']),
@@ -138,10 +133,6 @@ export const DetectionReportSchema = z.object({
 });
 export type DetectionReport = z.infer<typeof DetectionReportSchema>;
 
-/* ------------------------------------------------------------------ */
-/* Compatibility rules                                                  */
-/* ------------------------------------------------------------------ */
-
 export const DomainSchema = z
   .string()
   .transform((v) => normalizeHostname(v))
@@ -179,7 +170,6 @@ export const RuleSchema = z.object({
 });
 export type Rule = z.infer<typeof RuleSchema>;
 
-/** What a user (or an import) supplies when creating or editing a rule. */
 export const RuleInputSchema = z.object({
   id: RuleIdSchema.optional(),
   domain: DomainSchema,
@@ -198,10 +188,6 @@ export const RulesExportSchema = z.object({
   exportedAt: z.number().optional(),
   rules: z.array(z.unknown()).max(500),
 });
-
-/* ------------------------------------------------------------------ */
-/* Settings, sites and history                                          */
-/* ------------------------------------------------------------------ */
 
 export const ThemeSchema = z.enum(['system', 'light', 'dark']);
 export type Theme = z.infer<typeof ThemeSchema>;
@@ -230,10 +216,6 @@ export const SettingsSchema = z.object({
 export type Settings = z.infer<typeof SettingsSchema>;
 export const DEFAULT_SETTINGS: Settings = SettingsSchema.parse({});
 
-/**
- * Built from the default-free fields: in Zod 4, `.partial()` of a field with a
- * default still fills the default in, which would reset every other setting.
- */
 export const SettingsPatchSchema = z.object(SETTINGS_FIELDS).partial().strict();
 export type SettingsPatch = z.infer<typeof SettingsPatchSchema>;
 
@@ -275,7 +257,6 @@ export const HistoryEntrySchema = z.object({
   event: HistoryEventSchema,
   level: DetectionLevelSchema,
   confidence: z.number().min(0).max(100),
-  /** Signal ids only (for example "phrase-strong"); never page text. */
   signals: z.array(z.string().max(64)).max(40),
 });
 export type HistoryEntry = z.infer<typeof HistoryEntrySchema>;

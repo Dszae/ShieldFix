@@ -26,7 +26,6 @@ import { stableSelector } from '../fixer/selector';
 import { Notice } from './notice';
 import { buildReport, EMPTY_FIX, toSummary } from './report';
 
-/** Messages the controller sends to the background service worker. */
 export interface Bridge {
   getConfig(): Promise<ContentConfig | null>;
   report(report: DetectionReport): void;
@@ -58,7 +57,6 @@ export class ContentController {
   private readonly lateInserted = new WeakSet<Element>();
   private readonly notice: Notice;
 
-  // Monitoring state
   private observer: MutationObserver | null = null;
   private monitoring = false;
   private deadline = 0;
@@ -73,7 +71,6 @@ export class ContentController {
   constructor(
     private readonly win: Window & typeof globalThis,
     private readonly bridge: Bridge,
-    /** Layout access; injectable so the controller can be tested without a layout engine. */
     private readonly probeFactory: (
       win: Window & typeof globalThis,
     ) => LayoutProbe = createDomProbe,
@@ -94,22 +91,15 @@ export class ContentController {
     return normalizeHostname(this.win.location.hostname);
   }
 
-  /* ------------------------------- config ------------------------------- */
-
   async refreshConfig(): Promise<ContentConfig | null> {
-    try {
-      this.config = await this.bridge.getConfig();
-    } catch {
-      // Keep the previous config if the background is momentarily unavailable.
-    }
+    const keepPreviousConfig = () => this.config;
+    this.config = await this.bridge.getConfig().catch(keepPreviousConfig);
     return this.config;
   }
 
   get isMonitoring(): boolean {
     return this.monitoring;
   }
-
-  /* -------------------------------- scan -------------------------------- */
 
   private idFor = (el: Element): string => {
     let id = this.ids.get(el);
@@ -134,7 +124,6 @@ export class ContentController {
     };
   }
 
-  /** Runs detection synchronously against the current DOM. */
   private runScan(trigger: ScanTrigger): DetectionReport {
     const started = performance.now();
     const probe = this.probeFactory(this.win);
@@ -186,12 +175,9 @@ export class ContentController {
     );
   }
 
-  /** Auto-apply remembered fixes and show the in-page notice when appropriate. */
   private async afterScan(report: DetectionReport, trigger: ScanTrigger): Promise<DetectionReport> {
     const config = this.config;
 
-    // A fix is active. If the page inserted a *new* warning, re-apply under the
-    // same approval, a bounded number of times.
     if (this.fix) {
       const fixedEl = this.elementFor(this.fix.candidateId);
       const fresh = this.lastScan?.candidates.find(
@@ -246,8 +232,6 @@ export class ContentController {
     return this.elements.get(id)?.deref() ?? null;
   }
 
-  /* -------------------------------- fixes ------------------------------- */
-
   previewFix(candidateId: string): ContentFixPreview {
     const candidate = this.freshCandidate(candidateId);
     const actions = planFix(candidate, this.lastScan!.page, this.win.document);
@@ -258,7 +242,6 @@ export class ContentController {
     };
   }
 
-  /** Re-scan and return the candidate only if it is still present and fixable. */
   private freshCandidate(candidateId: string): CandidateResult {
     const el = this.elementFor(candidateId);
     if (!el || !el.isConnected) {
@@ -395,9 +378,6 @@ export class ContentController {
     }
   }
 
-  /* ------------------------------ monitoring ----------------------------- */
-
-  /** Start automatic detection for a monitored site (called once after config). */
   startMonitoring(): void {
     if (this.monitoring) return;
     this.monitoring = true;
@@ -456,7 +436,6 @@ export class ContentController {
       return;
     }
     if (this.win.location.href !== this.lastHref) {
-      // Single-page navigation: treat as a new page view.
       this.lastHref = this.win.location.href;
       this.noticeDismissed = false;
       this.mutationScans = 0;
@@ -485,11 +464,10 @@ export class ContentController {
     }, LIMITS.mutationDebounceMs);
   }
 
-  /** Cheap pre-filter: only run a full scan if a changed element looks relevant. */
   private isRelevant(el: Element): boolean {
     if (!el.isConnected) return false;
     const doc = this.win.document;
-    if (el === doc.documentElement || el === doc.body) return true; // scroll locks
+    if (el === doc.documentElement || el === doc.body) return true;
     try {
       if (el.matches(SEED_SELECTOR) || el.querySelector(SEED_SELECTOR)) return true;
     } catch {
@@ -530,7 +508,6 @@ export class ContentController {
     if (changed) this.bridge.report(report);
   }
 
-  /** Stop all observation and undo any active fix (used on teardown). */
   destroy(): void {
     this.disconnect();
     this.win.document.removeEventListener('visibilitychange', this.onVisibility);

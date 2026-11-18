@@ -1,4 +1,3 @@
-/** Minimal key-value storage contract (chrome.storage.local / .session or in-memory). */
 export interface StorageArea {
   get(keys: string[]): Promise<Record<string, unknown>>;
   set(items: Record<string, unknown>): Promise<void>;
@@ -36,13 +35,11 @@ export class MemoryArea implements StorageArea {
     this.data.clear();
   }
 
-  /** Test helper. */
   raw(key: string): unknown {
     return this.data.get(key);
   }
 }
 
-/** Serialises async read-modify-write operations. */
 export class Mutex {
   private tail: Promise<unknown> = Promise.resolve();
 

@@ -1,9 +1,3 @@
-/**
- * Layout probe: the only place the detection engine touches layout APIs.
- * Abstracting it keeps the engine unit-testable in DOM environments that do not
- * perform layout, and lets each scan cache computed styles.
- */
-
 export interface Rect {
   x: number;
   y: number;
@@ -16,9 +10,7 @@ export interface LayoutProbe {
   documentHeight(): number;
   rect(el: Element): Rect;
   style(el: Element): CSSStyleDeclaration;
-  /** Visible text of an element, truncated to `max` characters. */
   text(el: Element, max: number): string;
-  /** Elements at a viewport point, topmost first. Empty when unsupported. */
   elementsAtPoint(x: number, y: number): Element[];
 }
 
@@ -49,8 +41,6 @@ export function createDomProbe(win: Window & typeof globalThis): LayoutProbe {
     },
     text(el, max) {
       const raw = el.textContent ?? '';
-      // innerText forces layout and is expensive on large subtrees; only use it
-      // for reasonably sized elements, where it correctly excludes hidden text.
       if (raw.length <= 20_000 && 'innerText' in el) {
         return ((el as HTMLElement).innerText ?? raw).slice(0, max);
       }
@@ -87,7 +77,6 @@ export function zIndexOf(el: Element, probe: LayoutProbe): number {
   return Number.isFinite(z) ? z : 0;
 }
 
-/** Parse the alpha channel of a computed `rgb()/rgba()` colour. */
 export function colorAlpha(color: string): number {
   const m = color.match(/rgba?\(([^)]+)\)/);
   if (!m?.[1]) return color === 'transparent' ? 0 : 1;

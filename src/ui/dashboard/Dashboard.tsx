@@ -76,7 +76,7 @@ export function Dashboard() {
 
   const navigate = useCallback((id: string) => {
     location.hash = `#/${id}`;
-    document.getElementById('main')?.focus(); // move focus to the new section for keyboard users
+    document.getElementById('main')?.focus();
   }, []);
 
   const { data: loaded, reload } = data;

@@ -13,7 +13,6 @@ export function primaryOf(report: DetectionReport | null): CandidateSummary | nu
   return report.candidates.find((c) => c.id === report.primaryCandidateId) ?? null;
 }
 
-/** Maps a report to the main popup status. Wording never overstates what happened. */
 export function statusFor(report: DetectionReport | null, scanning: boolean): StatusView {
   if (!report) {
     return scanning

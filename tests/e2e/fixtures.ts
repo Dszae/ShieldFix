@@ -8,7 +8,6 @@ export const fixture = (name: string) => `${FIXTURES}/${name}.html`;
 interface ExtensionFixtures {
   context: BrowserContext;
   extensionId: string;
-  /** An extension page used to talk to the background worker like the real UI does. */
   ext: ExtensionClient;
 }
 
@@ -45,14 +44,12 @@ export class ExtensionClient {
 }
 
 export const test = base.extend<ExtensionFixtures>({
-  // eslint-disable-next-line no-empty-pattern
   context: async ({}, use, testInfo) => {
     const extensionPath = resolve('dist-e2e');
     const executablePath = testInfo.project.use.launchOptions?.executablePath;
     const context = await chromium.launchPersistentContext('', {
       channel: executablePath ? undefined : 'chromium',
       executablePath,
-      // Brave runs headless unless BRAVE_HEADED=1 (useful when debugging).
       headless: !(executablePath && process.env.BRAVE_HEADED === '1'),
       viewport: { width: 1280, height: 800 },
       args: [`--disable-extensions-except=${extensionPath}`, `--load-extension=${extensionPath}`],
@@ -74,7 +71,6 @@ export const test = base.extend<ExtensionFixtures>({
 
 export { expect } from '@playwright/test';
 
-/** Open a fixture page and return it with its tab id. */
 export async function openFixture(context: BrowserContext, ext: ExtensionClient, name: string) {
   const page = await context.newPage();
   await page.goto(fixture(name));

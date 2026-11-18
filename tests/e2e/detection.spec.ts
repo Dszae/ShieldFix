@@ -18,7 +18,7 @@ test.describe('anti-adblock warnings are detected and fixed reversibly', () => {
     expect(primary.fixable).toBe(true);
     expect(report.page.scrollLocked).toBe(true);
     expect(report.page.blurredElements).toBeGreaterThan(0);
-    expect(report.ordinaryDialogs).toBe(0); // its backdrop is part of the warning
+    expect(report.ordinaryDialogs).toBe(0);
 
     const preview = await ext.data<{ actions: { kind: string }[]; rememberSelector: string }>({
       type: 'tab/previewFix',
@@ -73,7 +73,6 @@ test.describe('anti-adblock warnings are detected and fixed reversibly', () => {
     });
     expect(outcome.applied).toBe(true);
     await expect(page.locator('#adblock-notice')).toBeHidden();
-    // Banners don't lock the page, so no scroll changes are made.
     expect(outcome.verified.scrollRestored).toBeNull();
   });
 
@@ -113,7 +112,6 @@ test.describe('ordinary page elements are never treated as anti-adblock warnings
       expect(report.primaryCandidateId).toBeNull();
       expect(report.level).toBe('none');
       expect(report.candidates.every((c) => !c.fixable)).toBe(true);
-      // Even a forged request to fix any element it saw is refused.
       for (const c of report.candidates) {
         const res = await ext.send({
           type: 'tab/applyFix',

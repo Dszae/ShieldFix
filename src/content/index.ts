@@ -8,14 +8,6 @@ import type {
 import { ContentController, type Bridge } from './controller';
 import { parseToContent } from './validate';
 
-/**
- * Content script entry. Runs in the isolated world of top-level http(s) pages:
- *  - injected on demand (activeTab) when the user opens the popup, or
- *  - registered at document_start for sites the user chose to monitor.
- * It never communicates with page scripts and accepts messages only from the
- * ShieldFix extension itself.
- */
-
 declare global {
   var __shieldfixController: ContentController | undefined;
 }
@@ -63,12 +55,11 @@ async function handle(controller: ContentController, msg: ToContent): Promise<un
 }
 
 function boot(): void {
-  if (globalThis.__shieldfixController) return; // already running in this document
-  if (window.top !== window) return; // top frame only
+  if (globalThis.__shieldfixController) return;
+  if (window.top !== window) return;
   const controller = new ContentController(window, bridge);
   globalThis.__shieldfixController = controller;
 
-  // When registered at document_start, capture failed resource loads from the beginning.
   const early = document.readyState === 'loading';
   if (early) controller.recorder.start(window);
 

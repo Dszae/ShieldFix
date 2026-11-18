@@ -1,11 +1,5 @@
-/**
- * Hostname utilities. ShieldFix keys all site data by hostname (with a leading
- * "www." removed). Full URLs, paths and query strings are never stored.
- */
-
 const HOSTNAME_RE = /^(?=.{3,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}$/;
 
-/** Common multi-label public suffixes. Not a full Public Suffix List — see docs/ARCHITECTURE.md. */
 const MULTI_PART_SUFFIXES = new Set([
   'co.uk',
   'org.uk',
@@ -46,7 +40,6 @@ export function isValidHostname(value: string): boolean {
   return HOSTNAME_RE.test(value);
 }
 
-/** Lower-case, strip a trailing dot and a leading "www.". */
 export function normalizeHostname(hostname: string): string {
   let host = hostname.trim().toLowerCase();
   if (host.endsWith('.')) host = host.slice(0, -1);
@@ -62,7 +55,6 @@ export interface UrlInfo {
 
 const RESTRICTED_HOSTS = ['chromewebstore.google.com', 'chrome.google.com'];
 
-/** Decide whether ShieldFix can work on a URL (http/https pages only). */
 export function describeUrl(url: string | undefined | null): UrlInfo {
   if (!url) return { supported: false, hostname: null, reason: 'No page is open in this tab.' };
   let parsed: URL;
@@ -89,25 +81,22 @@ export function describeUrl(url: string | undefined | null): UrlInfo {
   return { supported: true, hostname, reason: null };
 }
 
-/** True when `host` equals `domain` or is a subdomain of it. */
 export function hostMatchesDomain(host: string, domain: string): boolean {
   const h = normalizeHostname(host);
   const d = normalizeHostname(domain);
   return h === d || h.endsWith(`.${d}`);
 }
 
-/** Match patterns covering a site and its subdomains, for permissions and content scripts. */
 export function originPatternsFor(hostname: string): string[] {
   const host = normalizeHostname(hostname);
   if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return [`*://${host}/*`];
   return [`*://${host}/*`, `*://*.${host}/*`];
 }
 
-/** Approximate registrable domain ("site"), used only to label resources first/third-party. */
 export function approximateSite(hostname: string): string {
   const labels = normalizeHostname(hostname).split('.');
   if (labels.length <= 2) return labels.join('.');
-  if (/^\d+$/.test(labels[labels.length - 1] ?? '')) return labels.join('.'); // IPv4
+  if (/^\d+$/.test(labels[labels.length - 1] ?? '')) return labels.join('.');
   const lastTwo = labels.slice(-2).join('.');
   if (MULTI_PART_SUFFIXES.has(lastTwo)) return labels.slice(-3).join('.');
   return lastTwo;

@@ -48,7 +48,6 @@ export interface BuildReportInput {
   idFor: (el: Element) => string;
   resources: BlockedResources;
   fix: FixState;
-  /** Summary of the candidate a fix is currently hiding (it is no longer visible to scans). */
   fixedCandidate: CandidateSummary | null;
   monitoring: boolean;
   now: number;

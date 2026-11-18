@@ -1,13 +1,3 @@
-/**
- * Static safety checks for CSS selectors stored in compatibility rules.
- *
- * CSS selectors cannot execute code, but an overly broad or expensive selector could
- * hide important content or slow pages down. Rules must therefore target a specific,
- * identifiable element (class, id or attribute), use a restricted character set, and
- * avoid costly or structural pseudo-classes. Syntax validity is checked separately
- * against a real DOM where one is available (see `isSyntacticallyValidSelector`).
- */
-
 export type SelectorCheck = { ok: true } | { ok: false; reason: string };
 
 export const MAX_SELECTOR_LENGTH = 200;
@@ -49,7 +39,6 @@ function splitTopLevel(selector: string, separator: string): string[] {
   return parts;
 }
 
-/** The last compound selector of a complex selector (after the final combinator). */
 function lastCompound(part: string): string {
   const pieces = splitTopLevel(part.replace(/\s*([>+~])\s*/g, ' ').trim(), ' ').filter(Boolean);
   return pieces[pieces.length - 1] ?? '';
@@ -107,7 +96,6 @@ export function checkSelectorSafety(input: string): SelectorCheck {
   return { ok: true };
 }
 
-/** Syntax check using the DOM, when one exists (UI pages and content scripts). */
 export function isSyntacticallyValidSelector(selector: string, doc?: Document): boolean {
   const d = doc ?? (typeof document !== 'undefined' ? document : undefined);
   if (!d) return true;

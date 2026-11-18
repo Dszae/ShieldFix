@@ -5,7 +5,7 @@ import { AnnouncerProvider } from '../components/Announcer';
 import { applyTheme } from '../lib/hooks';
 import { Popup } from './Popup';
 
-applyTheme('system'); // until settings load, avoid a flash of the wrong theme
+applyTheme('system');
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

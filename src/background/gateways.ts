@@ -6,11 +6,6 @@ import {
   type ToContentResponseMap,
 } from '../shared/messages';
 
-/**
- * Thin wrappers around browser APIs. The router depends on these interfaces, so
- * its logic can be tested without a browser.
- */
-
 export interface TabsGateway {
   getUrl(tabId: number): Promise<string | null>;
   send<T extends ToContent['type']>(
@@ -132,13 +127,12 @@ const BADGE = {
 export const chromeBadge: BadgeGateway = {
   async set(tabId, state) {
     const b = BADGE[state];
-    try {
-      await chrome.action.setBadgeText({ tabId, text: b.text });
-      if (b.text) await chrome.action.setBadgeBackgroundColor({ tabId, color: b.color });
-      await chrome.action.setTitle({ tabId, title: b.title });
-    } catch {
-      // Tab closed meanwhile.
+    const ignoreClosedTab = () => undefined;
+    await chrome.action.setBadgeText({ tabId, text: b.text }).catch(ignoreClosedTab);
+    if (b.text) {
+      await chrome.action.setBadgeBackgroundColor({ tabId, color: b.color }).catch(ignoreClosedTab);
     }
+    await chrome.action.setTitle({ tabId, title: b.title }).catch(ignoreClosedTab);
   },
 };
 

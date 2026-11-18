@@ -57,14 +57,12 @@ export default tseslint.config(
     rules: { 'no-restricted-properties': 'off', '@typescript-eslint/no-non-null-assertion': 'off' },
   },
   {
-    // Playwright fixtures call `use()`, which is not a React hook.
     files: ['tests/e2e/**/*.ts'],
-    rules: { 'react-hooks/rules-of-hooks': 'off' },
+    rules: { 'react-hooks/rules-of-hooks': 'off', 'no-empty-pattern': 'off' },
   },
   {
     files: ['scripts/**/*.mjs', 'tests/e2e/**/*.mjs', '*.config.{js,ts}'],
     extends: [js.configs.recommended],
-    // Callbacks passed to Playwright's page.evaluate() run in the browser.
     languageOptions: { globals: { ...globals.node, ...globals.browser, ...globals.webextensions } },
   },
 );

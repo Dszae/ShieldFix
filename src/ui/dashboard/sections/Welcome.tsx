@@ -41,7 +41,7 @@ export function Welcome() {
     setBusy(true);
     setError(null);
     const permission =
-      mode === 'all-sites' ? requestOrigins([...ALL_SITES_ORIGINS]) : Promise.resolve(true); // in the click
+      mode === 'all-sites' ? requestOrigins([...ALL_SITES_ORIGINS]) : Promise.resolve(true);
     void permission
       .then(async (granted) => {
         if (mode === 'all-sites') {

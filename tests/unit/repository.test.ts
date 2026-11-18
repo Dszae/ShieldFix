@@ -173,7 +173,7 @@ describe('history', () => {
       signals: [],
     });
     const list = await repo.listHistory();
-    expect(list.map((h) => h.hostname)).toEqual(['new.com']); // default retention: 30 days
+    expect(list.map((h) => h.hostname)).toEqual(['new.com']);
     for (let i = 0; i < 520; i++) {
       await repo.addHistory({
         hostname: 'x.com',

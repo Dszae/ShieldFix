@@ -1,15 +1,4 @@
 #!/usr/bin/env node
-/**
- * Builds the extension with Vite in three passes:
- *   1. extension pages (popup, dashboard) — ES modules with shared chunks
- *   2. background service worker — single ES module, no shared chunks
- *   3. content script — single IIFE (content scripts cannot be modules)
- * then writes manifest.json with the version from package.json.
- *
- *   node scripts/build.mjs           production build -> dist/
- *   node scripts/build.mjs --e2e     test build -> dist-e2e/ (adds host access to 127.0.0.1 only)
- *   node scripts/build.mjs --watch   rebuild on change
- */
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -93,9 +82,6 @@ async function writeManifest() {
   const manifest = JSON.parse(await readFile(resolve(root, 'src/manifest.json'), 'utf8'));
   manifest.version = pkg.version;
   if (e2e) {
-    // Test builds only: grant access to the local fixture server (and the reserved
-    // example.com domain, mapped to it when recording README media) so automated
-    // tests can inject without a toolbar click. Never used for release builds.
     manifest.name = 'ShieldFix (E2E test build)';
     manifest.host_permissions = ['*://127.0.0.1/*', '*://*.example.com/*'];
   }

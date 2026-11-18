@@ -2,20 +2,6 @@ import { isSameSite, normalizeHostname } from '../shared/domain';
 import type { BlockedResources, ResourceCategory } from '../shared/schemas';
 import { isAdTrackingHost } from './adHosts';
 
-/**
- * Failed / blocked resource analysis.
- *
- * Browsers do not expose to extensions *why* a request failed, so ShieldFix uses
- * two evidence sources:
- *  - `error-events`: when the content script runs at document_start on monitored
- *    sites, it records `error` events for scripts, stylesheets and images.
- *  - `heuristic`: for on-demand scans, it compares script elements with the
- *    Resource Timing buffer (blocked requests have no timing entry) and checks
- *    images that finished without decoding. This is approximate and is labelled
- *    as such in the UI.
- * Only hostnames are reported; URLs and paths are discarded.
- */
-
 export type ResourceKind = 'script' | 'stylesheet' | 'image' | 'other';
 
 export interface FailedResource {
@@ -89,7 +75,6 @@ function describeFailedElement(el: Element, base: string): FailedResource | null
 
 const RESOURCE_TIMING_DEFAULT_BUFFER = 250;
 
-/** Heuristic for pages scanned after load (no error events captured). */
 export function heuristicFailures(win: Window): { failures: FailedResource[]; reliable: boolean } {
   const doc = win.document;
   const base = win.location.href;
@@ -105,7 +90,7 @@ export function heuristicFailures(win: Window): { failures: FailedResource[]; re
     );
     for (const script of scripts) {
       const type = (script.getAttribute('type') ?? '').trim().toLowerCase();
-      if (!EXECUTABLE_SCRIPT_TYPES.has(type)) continue; // consent-gated or data scripts
+      if (!EXECUTABLE_SCRIPT_TYPES.has(type)) continue;
       let abs: string;
       try {
         abs = new URL(script.src, base).href;

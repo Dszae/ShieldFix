@@ -76,13 +76,12 @@ describe('anti-adblock detection', () => {
         <button>Refresh</button>
       </div>`);
     layout.fullscreen($('#scrim')).set($('#modal'), [440, 250, 400, 300]);
-    layout.topAt = $('#scrim'); // the scrim is also discovered on its own
+    layout.topAt = $('#scrim');
     const result = scan();
     const c = top(result)!;
     expect(c.el).toBe($('#modal'));
     expect(c.geometry).toBe('modal');
     expect(c.backdrops).toEqual([$('#scrim')]);
-    // ...but it is reported as part of the warning, not as an ordinary dialog.
     expect(result.candidates.some((x) => x.el === $('#scrim'))).toBe(false);
     expect(result.ordinaryDialogs).toBe(0);
   });
@@ -140,7 +139,7 @@ describe('false-positive safeguards', () => {
     html(`<div id="pay" style="position:fixed;z-index:9999">
       <p>You've reached your free article limit. Subscribe to continue reading.</p><button>Subscribe</button></div>`);
     layout.fullscreen($('#pay'));
-    layout.topAt = $('#pay'); // discovered by hit-testing the viewport, as in a real browser
+    layout.topAt = $('#pay');
     const c = top(scan())!;
     expect(c.classification).toBe('subscription-prompt');
     expect(c.fixable).toBe(false);
@@ -262,5 +261,29 @@ describe('page state', () => {
     document.body.style.overflowY = 'hidden';
     layout.docHeight = 600;
     expect(scan().page.scrollLocked).toBe(false);
+  });
+});
+
+describe('real-world walls', () => {
+  it.each([
+    'Please Turnoff Adblocker or Brave Shields or Private DNS. We really appreciate your support..',
+    'Please disable your adblocker or Brave Shields or DNS to continue browsing this site.',
+  ])('fixes a streaming-site wall that says "%s"', (message) => {
+    html(`
+      <div class="player"><video></video><button class="refresh-btn">Refresh</button></div>
+      <div class="adb" id="adb" style="position:fixed;z-index:99999;background:rgba(0,0,0,0.85)">
+        <div class="adbs">
+          <h3>Ad-blocker Detected!</h3>
+          <p id="adb-msg">${message}</p>
+          <small id="adb-note">Refresh the page after disabling your Adblocker or use chrome browser</small>
+        </div>
+      </div>`);
+    layout.fullscreen($('#adb'));
+    const c = top(scan())!;
+    expect(c.el).toBe($('#adb'));
+    expect(c.classification).toBe('anti-adblock-overlay');
+    expect(c.signals.map((s) => s.id)).toContain('attr-pattern');
+    expect(c.confidence).toBeGreaterThanOrEqual(90);
+    expect(c.fixable).toBe(true);
   });
 });

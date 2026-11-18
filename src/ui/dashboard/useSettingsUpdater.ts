@@ -3,7 +3,6 @@ import type { SettingsPatch } from '../../shared/schemas';
 import { errorMessage, send } from '../lib/api';
 import { useAnnounce } from '../components/announcerContext';
 
-/** Saves a settings patch with busy/error state and a screen-reader announcement. */
 export function useSettingsUpdater() {
   const announce = useAnnounce();
   const [error, setError] = useState<string | null>(null);

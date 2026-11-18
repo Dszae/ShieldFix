@@ -224,7 +224,6 @@ describe('fixes', () => {
     });
     expect((await t.repo.getSite('example.com'))!.autoFix).toBe(true);
     expect(t.contentCalls.map((c) => c.type)).toContain('cs/configChanged');
-    // remembering again does not duplicate the rule
     await t.router.handle(
       { type: 'tab/applyFix', tabId: 7, candidateId: 'c1', remember: true },
       ui,

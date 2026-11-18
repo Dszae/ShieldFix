@@ -39,7 +39,7 @@ import type {
 
 export interface RouterDeps {
   extensionId: string;
-  extensionOrigin: string; // e.g. chrome-extension://<id>/
+  extensionOrigin: string;
   version: string;
   repo: Repository;
   tabsState: TabStateStore;
@@ -62,7 +62,6 @@ const BRAVE_PAGES: Record<'shields' | 'content-filtering', string[]> = {
   'content-filtering': ['brave://settings/shields/filters', 'brave://adblock'],
 };
 
-/** "*://example.com/*" -> "example.com"; wildcard-host patterns return null. */
 export function hostFromPattern(pattern: string): string | null {
   const m = pattern.match(/^(?:\*|https?):\/\/([^/*]+)\/\*$/);
   if (!m?.[1]) return null;
@@ -72,8 +71,6 @@ export function hostFromPattern(pattern: string): string | null {
 
 export function createRouter(deps: RouterDeps) {
   const { repo } = deps;
-
-  /* ------------------------------ monitoring ------------------------------ */
 
   async function computeMonitoring(): Promise<
     Pick<AppInfo, 'monitoringMode' | 'monitoredHosts' | 'allSitesPermission'> & {
@@ -139,8 +136,6 @@ export function createRouter(deps: RouterDeps) {
     return state.monitoredHosts.some((h) => hostMatchesDomain(hostname, h));
   }
 
-  /* -------------------------------- tabs ---------------------------------- */
-
   async function tabHostname(tabId: number): Promise<string> {
     const info = describeUrl(await deps.tabs.getUrl(tabId));
     if (!info.supported || !info.hostname) {
@@ -150,12 +145,11 @@ export function createRouter(deps: RouterDeps) {
   }
 
   async function ensureContent(tabId: number): Promise<void> {
-    try {
-      await deps.tabs.send(tabId, { type: 'cs/ping' });
-      return;
-    } catch {
-      // Not injected yet.
-    }
+    const alreadyInjected = await deps.tabs.send(tabId, { type: 'cs/ping' }).then(
+      () => true,
+      () => false,
+    );
+    if (alreadyInjected) return;
     await deps.tabs.inject(tabId);
     await deps.tabs.send(tabId, { type: 'cs/ping' });
   }
@@ -168,7 +162,6 @@ export function createRouter(deps: RouterDeps) {
     else await deps.badge.set(tabId, 'clear');
   }
 
-  /** Persist report, badge, site summary and (de-duplicated) history. */
   async function ingestReport(
     tabId: number,
     report: DetectionReport,
@@ -214,14 +207,11 @@ export function createRouter(deps: RouterDeps) {
       });
       await deps.tabsState.markRecorded(tabId, { recordedLevel: report.level });
     } else if (report.level === 'none') {
-      // Keep an existing site summary current without creating new records.
       if (await repo.getSite(report.hostname)) {
         await repo.recordScan(report.hostname, { level: 'none', confidence: report.confidence });
       }
     }
   }
-
-  /* --------------------------- UI request handlers ------------------------- */
 
   async function handleUi(req: UiRequest): Promise<UiResponseMap[UiRequest['type']]> {
     switch (req.type) {
@@ -405,8 +395,6 @@ export function createRouter(deps: RouterDeps) {
     }
   }
 
-  /* ------------------------ content request handlers ----------------------- */
-
   async function handleContent(
     req: ContentRequest,
     tabId: number,
@@ -455,8 +443,6 @@ export function createRouter(deps: RouterDeps) {
     }
   }
 
-  /* -------------------------------- entry --------------------------------- */
-
   async function handle(message: unknown, sender: Sender): Promise<Envelope<unknown>> {
     try {
       if (sender.id !== deps.extensionId) return fail('forbidden', 'Unknown sender.');
@@ -482,11 +468,6 @@ export function createRouter(deps: RouterDeps) {
     }
   }
 
-  /**
-   * Monitoring follows the permissions the user actually granted (through
-   * ShieldFix's UI or the browser's site-access menu), so a closed popup or a
-   * revoked permission can never leave the stored preference out of sync.
-   */
   async function onPermissionsChanged(change: {
     added?: string[];
     removed?: string[];

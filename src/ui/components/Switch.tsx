@@ -9,7 +9,6 @@ export interface SwitchProps {
   busy?: boolean;
 }
 
-/** Accessible toggle: a button with role="switch", labelled and described. */
 export function Switch({ checked, onChange, label, description, disabled, busy }: SwitchProps) {
   const id = useId();
   return (

@@ -33,7 +33,7 @@ export function Sites() {
     const patterns = originPatternsFor(site.hostname);
     setBusy(`${site.hostname}:monitor`);
     setError(null);
-    const permission = enable ? requestOrigins(patterns) : Promise.resolve(true); // must start in the click
+    const permission = enable ? requestOrigins(patterns) : Promise.resolve(true);
     void permission
       .then(async (granted) => {
         if (!granted) {

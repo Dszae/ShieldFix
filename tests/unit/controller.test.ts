@@ -59,7 +59,6 @@ describe('ContentController', () => {
     expect(report.level).toBe('high');
     expect(report.primaryCandidateId).toMatch(/^c\d+$/);
     expect(report.hostname).toBe('localhost');
-    // The report never contains page text.
     expect(JSON.stringify(report)).not.toContain('Story text');
     expect(JSON.stringify(report)).not.toContain('disable your ad blocker to continue');
   });
@@ -83,7 +82,7 @@ describe('ContentController', () => {
     expect(result.verified.overlayHidden).toBe(true);
     expect($('#wall').style.display).toBe('none');
     expect(result.report.fix.active).toBe(true);
-    expect(result.report.level).toBe('high'); // still describes the hidden warning
+    expect(result.report.level).toBe('high');
 
     const reverted = c.revertFix();
     expect(reverted.reverted).toBe(true);
@@ -140,7 +139,6 @@ describe('ContentController', () => {
     const host = document.querySelector('shieldfix-notice');
     expect(host).not.toBeNull();
     expect(host!.shadowRoot!.textContent).toContain('Ad-blocker warning detected');
-    // The notice itself is never detected as a candidate.
     const report = await c.scan('manual');
     expect(report.candidates.every((x) => !x.descriptor.startsWith('shieldfix-notice'))).toBe(true);
   });

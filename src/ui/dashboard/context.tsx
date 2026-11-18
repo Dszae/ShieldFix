@@ -5,7 +5,6 @@ import type { Settings } from '../../shared/schemas';
 export interface DashboardContextValue {
   settings: Settings;
   info: AppInfo;
-  /** Increments whenever stored data changes. */
   version: number;
   refresh: () => void;
   navigate: (section: string) => void;

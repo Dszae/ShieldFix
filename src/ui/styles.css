@@ -2,10 +2,6 @@
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
-/*
- * Design tokens. Every colour pair used for text meets WCAG 2.2 AA contrast
- * (4.5:1) against the surface it is placed on, in both themes.
- */
 :root {
   color-scheme: light;
   --sf-bg: #f6f6f7;

@@ -1,15 +1,4 @@
 #!/usr/bin/env node
-/**
- * Generates the README media in docs/images/ from the real extension (E2E build):
- *   demo.gif            popup flow: detect -> review -> apply -> scroll
- *   auto-detect.gif     watched site: warning appears, in-page notice, one-click hide
- *   *.png               popup, dashboard, before/after, banner (also used as social preview)
- *
- * Pages are the local test fixtures, served under the reserved example.com domain via
- * Chromium's host resolver rules. Requires ffmpeg on PATH for the GIFs.
- *
- *   npm run build:e2e && node scripts/readme-media.mjs
- */
 import { execFileSync, spawn } from 'node:child_process';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
@@ -23,7 +12,6 @@ const ext = resolve(root, 'dist-e2e');
 const PORT = 4173;
 const site = (host, page) => `http://${host}.example.com:${PORT}/${page}.html`;
 
-/* ----------------------------------------------------------------- server */
 async function up() {
   try {
     return (await fetch(`http://127.0.0.1:${PORT}/health`)).ok;
@@ -69,7 +57,6 @@ try {
   await send({ type: 'settings/update', patch: { theme: 'light' } });
   const icon = `data:image/png;base64,${(await readFile(resolve(root, 'public/icons/icon-32.png'))).toString('base64')}`;
 
-  /* ------------------------------------------------- 1. demo.gif (popup) */
   const page = await context.newPage();
   await page.setViewportSize({ width: 1280, height: 751 });
   const demoUrl = site('news', 'fullscreen-modal');
@@ -217,7 +204,6 @@ try {
     );
   gif(['-f', 'concat', '-safe', '0', '-i', join(work, 'demo.txt')], join(out, 'demo.gif'));
 
-  // Before / after stills from the same page.
   await page.evaluate(() => window.scrollTo(0, 0));
   await sleep(150);
   const after = await page.screenshot();
@@ -241,7 +227,6 @@ try {
   await sleep(200);
   await stage.screenshot({ path: join(out, 'before-after.png') });
 
-  /* ------------------------------------- 2. auto-detect.gif (monitoring) */
   await send({ type: 'site/update', hostname: 'recipes.example.com', patch: { monitor: true } });
   await send({ type: 'monitoring/sync' });
   const live = await context.newPage();
@@ -287,10 +272,8 @@ try {
   const liveVideo = live.video();
   await live.close();
   const webm = await liveVideo.path();
-  // Skip the blank frames recorded before the first paint.
   gif(['-ss', '0.6', '-i', webm], join(out, 'auto-detect.gif'));
 
-  /* ----------------------------------------- 3. data for dashboard shots */
   for (const [host, name] of [
     ['tech', 'banner'],
     ['video', 'video-error'],
@@ -312,7 +295,6 @@ try {
     }
     await p.close();
   }
-  // A rule arriving through the real import path (validated, disabled, marked "Imported").
   await send({
     type: 'rules/import',
     payload: {
@@ -329,7 +311,6 @@ try {
     },
   });
 
-  /* ----------------------------------------------------- 4. screenshots */
   const popupShot = async (url, file, prepare) => {
     const p = await context.newPage();
     await p.setViewportSize({ width: 368, height: 640 });
@@ -360,7 +341,6 @@ try {
     await p.getByRole('heading', { name: 'Diagnosis' }).waitFor();
   });
   await send({ type: 'settings/update', patch: { developerMode: false } });
-  // The popup shots above undid the saved fix; re-enable its rule for the dashboard shots.
   const rules = await send({ type: 'rules/list' });
   for (const r of rules.data.filter((x) => x.domain === 'news.example.com')) {
     await send({ type: 'rules/setEnabled', id: r.id, enabled: true });
@@ -380,7 +360,6 @@ try {
     await helper.screenshot({ path: join(out, `dashboard-${section}-${theme}.png`) });
   }
 
-  /* ------------------------------------------------- 5. banner (1280x640) */
   await send({ type: 'settings/update', patch: { theme: 'dark' } });
   const darkPopup = await readFile(join(out, 'popup-dark.png'));
   const logo = (await readFile(resolve(root, 'public/icons/icon-128.png'))).toString('base64');

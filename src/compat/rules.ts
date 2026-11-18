@@ -11,14 +11,6 @@ import {
 } from '../shared/schemas';
 import type { ContentRuleConfig } from '../shared/messages';
 
-/**
- * Compatibility rule engine (pure functions; persistence lives in the repository).
- *
- * Rules are declarative: a domain, a validated CSS selector and a cosmetic rule
- * type. They never contain code. Imported and community rules always arrive
- * disabled and must be enabled by the user.
- */
-
 export function newRuleId(): string {
   const bytes = new Uint8Array(12);
   crypto.getRandomValues(bytes);
@@ -47,7 +39,6 @@ export function createRule(input: RuleInput, source: RuleSource, now: number): R
   });
 }
 
-/** Produces the next version of a rule. The caller archives the previous one. */
 export function reviseRule(existing: Rule, input: RuleInput, now: number): Rule {
   const parsed = RuleInputSchema.parse(input);
   return RuleSchema.parse({
@@ -84,7 +75,6 @@ export interface ParsedImport {
   rejected: { index: number; reason: string }[];
 }
 
-/** Validate an exported rules file. Every rule is re-validated individually. */
 export function parseRulesImport(payload: unknown): ParsedImport {
   const envelope = RulesExportSchema.safeParse(payload);
   if (!envelope.success) {
@@ -115,7 +105,6 @@ export function parseRulesImport(payload: unknown): ParsedImport {
       rejected.push({ index, reason: 'Rule is not an object.' });
       return;
     }
-    // Imported rules never carry their enabled state or id across.
     const result = RuleInputSchema.safeParse({ ...candidate.data, enabled: false });
     if (result.success) accepted.push(result.data);
     else rejected.push({ index, reason: result.error.issues.map((i) => i.message).join('; ') });

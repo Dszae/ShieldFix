@@ -1,8 +1,3 @@
-/**
- * A small list of widely known advertising / analytics domains, used only to
- * label failed resource loads in diagnostics ("expected: ad or tracking resource").
- * It is not a blocklist and ShieldFix never blocks or unblocks anything with it.
- */
 const AD_TRACKING_DOMAINS = [
   'doubleclick.net',
   'googlesyndication.com',
