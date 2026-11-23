@@ -26,6 +26,16 @@ describe('hostnames', () => {
     expect(isValidHostname('-bad.com')).toBe(false);
   });
 
+  it('validates IPv6 literals as URL.hostname reports them', () => {
+    // new URL('http://[2001:db8::1]/').hostname is "[2001:db8::1]".
+    expect(isValidHostname('[::1]')).toBe(true);
+    expect(isValidHostname('[2001:db8::1]')).toBe(true);
+    expect(isValidHostname('[::ffff:192.0.2.1]')).toBe(true);
+    expect(isValidHostname('[2001:db8::1')).toBe(false);
+    expect(isValidHostname('[zz::1]')).toBe(false);
+    expect(isValidHostname('[]')).toBe(false);
+  });
+
   it('matches subdomains but not lookalikes', () => {
     expect(hostMatchesDomain('example.com', 'example.com')).toBe(true);
     expect(hostMatchesDomain('www.news.example.com', 'example.com')).toBe(true);
@@ -39,6 +49,13 @@ describe('hostnames', () => {
       '*://*.example.com/*',
     ]);
     expect(originPatternsFor('127.0.0.1')).toEqual(['*://127.0.0.1/*']);
+    // An address has no subdomains: "*://*.[2001:db8::1]/*" is not a valid pattern.
+    expect(originPatternsFor('[2001:db8::1]')).toEqual(['*://[2001:db8::1]/*']);
+  });
+
+  it('round-trips an IPv6 host through its permission pattern', () => {
+    const [pattern] = originPatternsFor('[2001:db8::1]');
+    expect(hostFromPattern(pattern!)).toBe('[2001:db8::1]');
   });
 
   it('parses hosts back from patterns', () => {
