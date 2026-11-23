@@ -1,7 +1,36 @@
 import { describe, expect, it } from 'vitest';
-import { summarizeFailures } from '../../src/detection/resources';
+import { heuristicFailures, summarizeFailures } from '../../src/detection/resources';
 import { pageIssuesFor } from '../../src/content/report';
 import type { ScanResult } from '../../src/detection/engine';
+
+describe('heuristicFailures', () => {
+  // A page whose resource timing lists only the scripts that actually loaded.
+  function pageWith(html: string, loaded: string[]): Window {
+    document.body.innerHTML = html;
+    return {
+      document,
+      location: { href: 'https://example.com/page' },
+      performance: { getEntriesByType: () => loaded.map((name) => ({ name })) },
+    } as unknown as Window;
+  }
+
+  it('reports a script that never loaded', () => {
+    const win = pageWith('<script src="https://ads.example.net/ad.js"></script>', [
+      'https://example.com/app.js',
+    ]);
+    expect(heuristicFailures(win).failures).toEqual([{ host: 'ads.example.net', kind: 'script' }]);
+  });
+
+  it('does not report a nomodule script, which module-capable browsers never fetch', () => {
+    // Next.js and Vite's legacy plugin ship one on every page.
+    const win = pageWith(
+      '<script type="module" src="https://example.com/app.js"></script>' +
+        '<script nomodule src="https://example.com/polyfills.js"></script>',
+      ['https://example.com/app.js'],
+    );
+    expect(heuristicFailures(win).failures).toEqual([]);
+  });
+});
 
 describe('summarizeFailures', () => {
   it('groups by host and classifies first-party, third-party and ad/tracking resources', () => {
