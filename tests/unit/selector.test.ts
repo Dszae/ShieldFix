@@ -59,6 +59,12 @@ describe('checkSelectorSafety', () => {
     '.a, .b',
     '.wall:not(.x)',
     '[data-x="a b"]',
+    // Quoted attribute values are data: a colon or bracket in them is not a
+    // pseudo-class or a bracket of the selector (Tailwind classes like md:hidden).
+    'div[class*="md:hidden"]',
+    '[data-state="modal:open"]',
+    "[title='Disable adblock :(']",
+    '[data-x="a[b"]',
   ])('accepts %s', (sel) => expect(checkSelectorSafety(sel)).toEqual({ ok: true }));
   it.each([
     ['', 'empty'],
@@ -75,6 +81,9 @@ describe('checkSelectorSafety', () => {
     ['.a[', 'unbalanced'],
     ['x'.repeat(201), 'too long'],
     ['.a\\:b', 'backslash'],
+    ['[data-x="a:b"]:hover', 'pseudo-class after a quoted value'],
+    ['[data-x="a"]::before', 'pseudo-element after a quoted value'],
+    ['[data-x="a].b', 'unterminated quote'],
   ])('rejects %s (%s)', (sel) => {
     expect(checkSelectorSafety(sel).ok).toBe(false);
   });

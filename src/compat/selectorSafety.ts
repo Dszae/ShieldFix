@@ -56,15 +56,22 @@ export function checkSelectorSafety(input: string): SelectorCheck {
       reason: 'Selector contains characters that are not allowed (for example \\ { } ; < @ /).',
     };
   }
+  // A quoted attribute value is data: a ":" or bracket inside it is not part of
+  // the selector ([class*="md:hidden"] has no :hidden pseudo-class). Blank the
+  // values out before the bracket and pseudo-class checks. Backslashes are not
+  // allowed, so a quote cannot be escaped and any quote left over is unclosed.
+  const unquoted = selector.replace(/"[^"]*"|'[^']*'/g, 'q');
+  if (/["']/.test(unquoted)) return { ok: false, reason: 'Selector has an unterminated quote.' };
+
   let balance = 0;
-  for (const ch of selector) {
+  for (const ch of unquoted) {
     if (ch === '(' || ch === '[') balance++;
     if (ch === ')' || ch === ']') balance--;
     if (balance < 0) return { ok: false, reason: 'Selector has unbalanced brackets.' };
   }
   if (balance !== 0) return { ok: false, reason: 'Selector has unbalanced brackets.' };
 
-  const pseudoMatches = selector.match(/::?[a-zA-Z-]+/g) ?? [];
+  const pseudoMatches = unquoted.match(/::?[a-zA-Z-]+/g) ?? [];
   for (const raw of pseudoMatches) {
     if (raw.startsWith('::')) return { ok: false, reason: 'Pseudo-elements are not allowed.' };
     const name = raw.slice(1).toLowerCase();
