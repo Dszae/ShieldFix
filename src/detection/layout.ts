@@ -77,13 +77,31 @@ export function zIndexOf(el: Element, probe: LayoutProbe): number {
   return Number.isFinite(z) ? z : 0;
 }
 
+/**
+ * Alpha of a computed color, 0 to 1. Computed colors are not always rgb():
+ * browsers keep the space a color was written or mixed in, so oklab(), oklch(),
+ * lab(), hsl() and color(srgb ...) all occur (Tailwind v4's bg-black/50 is a
+ * color-mix that Chrome reports as oklab(0 0 0 / 0.5)).
+ */
 export function colorAlpha(color: string): number {
-  const m = color.match(/rgba?\(([^)]+)\)/);
-  if (!m?.[1]) return color === 'transparent' ? 0 : 1;
-  const parts = m[1].split(/[\s,/]+/).filter(Boolean);
-  if (parts.length < 4) return 1;
-  const a = parts[3] ?? '1';
-  return a.endsWith('%') ? Number.parseFloat(a) / 100 : Number.parseFloat(a);
+  const value = color.trim().toLowerCase();
+  if (value === 'transparent') return 0;
+  const args = value.match(/^[a-z-]+\((.*)\)$/)?.[1];
+  if (args === undefined) return 1;
+  let alpha: string | undefined;
+  const slash = args.lastIndexOf('/');
+  if (slash !== -1) {
+    // Modern syntax: rgb(0 0 0 / 50%), oklch(0.5 0.1 30 / 0.4), color(srgb 0 0 0 / 0.5).
+    alpha = args.slice(slash + 1).trim();
+  } else {
+    // Legacy comma syntax: rgba(0, 0, 0, 0.5), hsla(0, 0%, 0%, 0.5).
+    const parts = args.split(',');
+    if (parts.length === 4) alpha = parts[3]!.trim();
+  }
+  if (alpha === undefined) return 1;
+  if (alpha === 'none') return 0;
+  const n = alpha.endsWith('%') ? Number.parseFloat(alpha) / 100 : Number.parseFloat(alpha);
+  return Number.isFinite(n) ? Math.min(1, Math.max(0, n)) : 1;
 }
 
 export function describeElement(el: Element): string {
