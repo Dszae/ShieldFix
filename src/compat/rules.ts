@@ -71,7 +71,8 @@ export function toContentRules(rules: Rule[], host: string, now: number): Conten
 }
 
 export interface ParsedImport {
-  accepted: RuleInput[];
+  /** Each valid rule with its position in the file, so a rule skipped later can be named. */
+  accepted: { index: number; rule: RuleInput }[];
   rejected: { index: number; reason: string }[];
 }
 
@@ -88,7 +89,7 @@ export function parseRulesImport(payload: unknown): ParsedImport {
       ],
     };
   }
-  const accepted: RuleInput[] = [];
+  const accepted: ParsedImport['accepted'] = [];
   const rejected: ParsedImport['rejected'] = [];
   envelope.data.rules.slice(0, LIMITS.maxRules).forEach((raw, index) => {
     const candidate = z
@@ -106,7 +107,7 @@ export function parseRulesImport(payload: unknown): ParsedImport {
       return;
     }
     const result = RuleInputSchema.safeParse({ ...candidate.data, enabled: false });
-    if (result.success) accepted.push(result.data);
+    if (result.success) accepted.push({ index, rule: result.data });
     else rejected.push({ index, reason: result.error.issues.map((i) => i.message).join('; ') });
   });
   return { accepted, rejected };

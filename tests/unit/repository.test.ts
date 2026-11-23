@@ -3,6 +3,8 @@ import { MemoryArea } from '../../src/storage/area';
 import { Repository, SCHEMA_VERSION } from '../../src/storage/repository';
 import { DEFAULT_SETTINGS } from '../../src/shared/schemas';
 import { ShieldFixError } from '../../src/shared/messages';
+import { LIMITS } from '../../src/shared/constants';
+import { createRule } from '../../src/compat/rules';
 
 let area: MemoryArea;
 let now: number;
@@ -140,6 +142,32 @@ describe('rules', () => {
     expect(result.rejected).toHaveLength(1);
     const imported = (await repo.listRules()).find((r) => r.selector === '.new')!;
     expect(imported).toMatchObject({ enabled: false, source: 'community' });
+  });
+
+  it('reports the rules it skips once the rule limit is reached', async () => {
+    await area.set({
+      rules: Array.from({ length: LIMITS.maxRules - 2 }, (_, i) =>
+        createRule({ domain: 'example.com', selector: `.r${i}`, enabled: true }, 'user', now),
+      ),
+    });
+    const result = await repo.importRules({
+      format: 'shieldfix-rules',
+      formatVersion: 1,
+      rules: [
+        { domain: 'example.com', selector: '.r0' },
+        { domain: 'example.com', selector: '.a' },
+        { domain: 'example.com', selector: '.b' },
+        { domain: 'example.com', selector: '.c' },
+        { domain: 'example.com', selector: '.r1' },
+      ],
+    });
+    // Two fit, ".c" does not: it must be reported, not silently dropped. A
+    // duplicate after the limit still counts as a duplicate.
+    expect(result).toMatchObject({ imported: 2, duplicates: 2 });
+    expect(result.rejected).toEqual([
+      { index: 3, reason: `Not imported: you can store at most ${LIMITS.maxRules} rules.` },
+    ]);
+    expect(await repo.getRules()).toHaveLength(LIMITS.maxRules);
   });
 
   it('round-trips through export and import', async () => {
