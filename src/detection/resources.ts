@@ -89,6 +89,10 @@ export function heuristicFailures(win: Window): { failures: FailedResource[]; re
       400,
     );
     for (const script of scripts) {
+      // A browser that runs modules never fetches a nomodule script: it is a
+      // fallback for old browsers (Next.js ships one on every page), so its
+      // absence from resource timing is not a blocked request.
+      if (script.hasAttribute('nomodule')) continue;
       const type = (script.getAttribute('type') ?? '').trim().toLowerCase();
       if (!EXECUTABLE_SCRIPT_TYPES.has(type)) continue;
       let abs: string;
