@@ -272,18 +272,28 @@ export class Repository {
       const now = this.now();
       let imported = 0;
       let duplicates = 0;
-      for (const input of parsed.accepted) {
+      const rejected = [...parsed.rejected];
+      for (const { index, rule: input } of parsed.accepted) {
         const rule = createRule(input, 'community', now);
         if (rules.some((r) => r.domain === rule.domain && r.selector === rule.selector)) {
           duplicates++;
           continue;
         }
-        if (rules.length >= LIMITS.maxRules) break;
+        // Past the limit each remaining rule is reported, so the outcome
+        // accounts for every rule in the file instead of dropping the rest.
+        if (rules.length >= LIMITS.maxRules) {
+          rejected.push({
+            index,
+            reason: `Not imported: you can store at most ${LIMITS.maxRules} rules.`,
+          });
+          continue;
+        }
         rules.push(rule);
         imported++;
       }
       await this.area.set({ [KEYS.rules]: rules });
-      return { imported, duplicates, rejected: parsed.rejected };
+      rejected.sort((a, b) => a.index - b.index);
+      return { imported, duplicates, rejected };
     });
   }
 

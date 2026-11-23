@@ -106,8 +106,9 @@ describe('import', () => {
       ],
     });
     expect(parsed.accepted).toHaveLength(1);
-    expect(parsed.accepted[0]).toMatchObject({ enabled: false, selector: '.adblock-wall' });
-    expect(parsed.accepted[0]).not.toHaveProperty('id');
+    expect(parsed.accepted[0]!.index).toBe(0);
+    expect(parsed.accepted[0]!.rule).toMatchObject({ enabled: false, selector: '.adblock-wall' });
+    expect(parsed.accepted[0]!.rule).not.toHaveProperty('id');
     expect(parsed.rejected.map((r) => r.index)).toEqual([1, 2, 3]);
   });
 
