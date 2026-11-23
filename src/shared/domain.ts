@@ -35,8 +35,19 @@ const MULTI_PART_SUFFIXES = new Set([
 
 const IPV4_RE = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 
+/** An IPv6 literal in the bracketed form URL.hostname uses, e.g. "[2001:db8::1]". */
+function isIpv6Literal(value: string): boolean {
+  if (!/^\[[0-9a-f:.]+\]$/i.test(value)) return false;
+  try {
+    return new URL(`http://${value}/`).hostname.length > 2;
+  } catch {
+    return false;
+  }
+}
+
 export function isValidHostname(value: string): boolean {
   if (IPV4_RE.test(value)) return value.split('.').every((n) => Number(n) <= 255);
+  if (value.startsWith('[')) return isIpv6Literal(value);
   return HOSTNAME_RE.test(value);
 }
 
@@ -89,7 +100,9 @@ export function hostMatchesDomain(host: string, domain: string): boolean {
 
 export function originPatternsFor(hostname: string): string[] {
   const host = normalizeHostname(hostname);
-  if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return [`*://${host}/*`];
+  // An IP address has no subdomains, and "*.[2001:db8::1]" is not a valid
+  // match pattern, so addresses get the exact-host pattern only.
+  if (IPV4_RE.test(host) || host.startsWith('[')) return [`*://${host}/*`];
   return [`*://${host}/*`, `*://*.${host}/*`];
 }
 
